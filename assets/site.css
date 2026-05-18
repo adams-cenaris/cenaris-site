@@ -311,11 +311,10 @@ p:last-child { margin-bottom: 0; }
 .compare .partial { color: var(--amber-500); font-weight: 500; }
 .compare td.col-cenaris { background: rgba(74,159,204,0.04); }
 @media (max-width: 720px) {
-  .compare thead { display: none; }
-  .compare, .compare tbody, .compare tr, .compare td { display: block; width: 100%; }
-  .compare tr { border-bottom: 1px solid var(--gray-200); padding: 16px 0; }
-  .compare td { border: 0; padding: 6px 24px; }
-  .compare td::before { content: attr(data-label); font-weight: 600; color: var(--gray-900); display: block; font-size: 13px; }
+  .compare th, .compare td { padding: 14px 12px; font-size: 13px; }
+  .compare td:first-child, .compare th:first-child { min-width: 160px; }
+  .compare td:not(:first-child), .compare th:not(:first-child) { min-width: 90px; text-align: center; }
+  .compare thead th { white-space: nowrap; }
 }
 
 /* ── Forms ──────────────────────────────────── */

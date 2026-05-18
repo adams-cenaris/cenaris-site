@@ -601,9 +601,13 @@
   .mock-card-float { position: static; margin-top: 16px; }
 }
 @media (max-width: 600px) {
+  .mock-row-top { grid-template-columns: 1fr; gap: 16px; }
+  .mock-score svg { width: 72px; height: 72px; }
+  .mock-mini-stats { grid-template-columns: repeat(3, 1fr); }
+  .mock-mini-stats .v { font-size: 18px; }
+  .mock-mini-stats .l { font-size: 10px; }
   .mock-std { grid-template-columns: minmax(0, 1fr) auto; }
   .mock-bar { display: none; }
-  .mock-mini-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 /* Problem */
@@ -716,10 +720,3 @@
 <script src="assets/forms.js"></script>
 </body>
 </html>
-
-<style id="__om-edit-overrides">
-#footer .footer-grid .au { width: 275.115px !important }
-#footer .footer-grid .au { width: 295.115px !important }
-#footer .footer-grid .au { width: 3.115px !important }
-#footer .footer-grid .au { width: 3.115px !important }
-</style>
