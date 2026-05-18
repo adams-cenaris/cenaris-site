@@ -1,14 +1,14 @@
-// Cenaris forms — UTM capture + submission helper.
+// Cenaris forms &mdash; UTM capture + submission helper.
 // Posts JSON to a Google Apps Script web app deployed against the partner sheet.
 // See site/apps-script.gs for the server-side code and deploy instructions.
 
 (function () {
-  // ────────────────────────────────────────────────────────────────
-  // CONFIG — paste your Apps Script /exec URL here after deploying.
-  // It will look like:  https://script.google.com/macros/s/AKfycb…/exec
+  // ----------------------------------------------------------------
+  // CONFIG &mdash; paste your Apps Script /exec URL here after deploying.
+  // It will look like:  https://script.google.com/macros/s/AKfycb&hellip;/exec
   const ENDPOINT = window.CENARIS_FORMS_ENDPOINT || 'https://script.google.com/macros/s/AKfycbx8qTtF0IFTB5D62NDFrs3RkRhk-gA-F1i52rrSMNXpcx5E6SJczLXRvnMYTSlUcpNX/exec';
 
-  // ── UTM + referrer capture (runs on every page load) ──────────────
+  // -- UTM + referrer capture (runs on every page load) --------------
   // Stored in sessionStorage so they persist as the user navigates
   // from the landing page through to the partner form.
   const UTM_KEYS = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid'];
@@ -29,7 +29,7 @@
     if (!sessionStorage.getItem('cenaris-landing')) {
       sessionStorage.setItem('cenaris-landing', window.location.pathname + window.location.search);
     }
-  } catch (_) { /* sessionStorage can fail in private modes — ignore */ }
+  } catch (_) { /* sessionStorage can fail in private modes &mdash; ignore */ }
 
   function readTrackingContext() {
     const ctx = { page: window.location.pathname, userAgent: navigator.userAgent };
@@ -39,8 +39,8 @@
     return ctx;
   }
 
-  // ── Programmatic submission API ───────────────────────────────────
-  // Usage from outside: window.cenarisForms.submit('quiz', { email, score, … })
+  // -- Programmatic submission API -----------------------------------
+  // Usage from outside: window.cenarisForms.submit('quiz', { email, score, &hellip; })
   // Returns a Promise<{ok: boolean, error?: string}>.
   async function programmaticSubmit(formName, fields) {
     const data = Object.assign({ form: formName }, fields, readTrackingContext());
@@ -63,7 +63,7 @@
 
   window.cenarisForms = { submit: programmaticSubmit };
 
-  // ── Form wiring ───────────────────────────────────────────────────
+  // -- Form wiring ---------------------------------------------------
   // Any <form data-cenaris-form="partner" data-thanks="partner-thanks.html"> will be wired.
   function wireForm(form) {
     const formName = form.getAttribute('data-cenaris-form');
@@ -74,7 +74,7 @@
       const submitBtn = form.querySelector('button[type=submit]');
       const errEl = form.querySelector('[data-form-error]');
       if (errEl) errEl.style.display = 'none';
-      if (submitBtn) { submitBtn.disabled = true; submitBtn.dataset._label = submitBtn.innerHTML; submitBtn.innerHTML = 'Submitting…'; }
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.dataset._label = submitBtn.innerHTML; submitBtn.innerHTML = 'Submitting&hellip;'; }
 
       // Collect named fields.
       const data = { form: formName };
@@ -84,7 +84,7 @@
         else data[el.name] = el.value;
       });
 
-      // Honeypot — if filled, silently "succeed" without contacting the server.
+      // Honeypot &mdash; if filled, silently "succeed" without contacting the server.
       if (data.company_website) {
         if (thanksUrl) window.location.href = thanksUrl;
         return;

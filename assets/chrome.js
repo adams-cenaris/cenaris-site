@@ -1,5 +1,5 @@
-// Cenaris site chrome — pre-launch bar, nav, footer, cookie banner, countdown.
-// Inserted via <script> on every page. Set window.CENARIS_PAGE = 'home' | 'about' | … before loading.
+// Cenaris site chrome &mdash; pre-launch bar, nav, footer, cookie banner, countdown.
+// Inserted via <script> on every page. Set window.CENARIS_PAGE = 'home' | 'about' | &hellip; before loading.
 (function () {
   const LAUNCH_ISO = '2026-07-01T00:00:00+10:00';
   const launchTime = new Date(LAUNCH_ISO).getTime();
@@ -13,16 +13,16 @@
     { href: 'partner-with-us.html',        key: 'partner',  label: 'Partner' },
   ];
 
-  // ── Pre-launch bar ──────────────────────────
+  // -- Pre-launch bar --------------------------
   const prelaunchEl = document.getElementById('prelaunch');
   if (prelaunchEl && !sessionStorage.getItem('cenaris-prelaunch-dismissed')) {
     prelaunchEl.innerHTML = `
       <div class="prelaunch">
         <div class="container">
-          <span>Cenaris launches 1 July 2026 —</span>
+          <span>Cenaris launches 1 July 2026 &mdash;</span>
           <span class="countdown-mini" data-mini-cd></span>
-          <a href="sign-up.html">Join the waitlist →</a>
-          <button class="dismiss" aria-label="Dismiss announcement" data-dismiss-prelaunch>×</button>
+          <a href="sign-up.html">Join the waitlist &rarr;</a>
+          <button class="dismiss" aria-label="Dismiss announcement" data-dismiss-prelaunch>&times;</button>
         </div>
       </div>`;
     prelaunchEl.querySelector('[data-dismiss-prelaunch]').addEventListener('click', () => {
@@ -31,7 +31,7 @@
     });
   }
 
-  // ── Nav ─────────────────────────────────────
+  // -- Nav -------------------------------------
   const navEl = document.getElementById('nav');
   if (navEl) {
     navEl.innerHTML = `
@@ -69,7 +69,7 @@
     });
   }
 
-  // ── Footer ──────────────────────────────────
+  // -- Footer ----------------------------------
   const footerEl = document.getElementById('footer');
   if (footerEl) {
     footerEl.innerHTML = `
@@ -81,7 +81,7 @@
                 <img src="assets/logo-horizontal-white.png" alt="Cenaris" style="height:32px;width:auto;display:block"/>
               </div>
               <p><strong style="color:#fff">Compliance, Simplified.</strong><br/>
-              We are currently in the final stages of development, focused on the NDIS Practice Standards. We aim to provide more frameworks in the near future. Spots are limited on the early-bird list for our 1 July 2026 launch — enquire now to secure your spot.</p>
+              We are currently in the final stages of development, focused on the NDIS Practice Standards. We aim to provide more frameworks in the near future. Spots are limited on the early-bird list for our 1 July 2026 launch &mdash; enquire now to secure your spot.</p>
               <div class="au">
                 <svg width="24" height="12" viewBox="0 0 60 30" style="border-radius:2px;display:inline-block;flex-shrink:0" aria-label="Australian flag" role="img">
                   <rect width="60" height="30" fill="#012169"/>
@@ -101,7 +101,7 @@
                     <circle cx="55" cy="20" r="0.9"/>
                   </g>
                 </svg>
-                Proudly Australian · Servers hosted in Sydney
+                Proudly Australian &middot; Servers hosted in Sydney
               </div>
             </div>
             <div class="footer-col">
@@ -132,7 +132,7 @@
             </div>
           </div>
           <div class="footer-bottom">
-            <div>© 2026 Cenaris Pty Ltd. All rights reserved.</div>
+            <div>&copy; 2026 Cenaris Pty Ltd. All rights reserved.</div>
             <div class="footer-social">
               <a href="https://www.facebook.com/788958947637764" aria-label="Facebook" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.3 0-1.7.8-1.7 1.6V12h2.9l-.5 2.9h-2.5v7A10 10 0 0 0 22 12z"/></svg></a>
               <a href="https://www.instagram.com/cenarisai/" aria-label="Instagram" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
@@ -144,7 +144,7 @@
       </footer>`;
   }
 
-  // ── Cookie banner ───────────────────────────
+  // -- Cookie banner ---------------------------
   const cookieEl = document.getElementById('cookie');
   if (cookieEl && !localStorage.getItem('cenaris-cookie')) {
     cookieEl.innerHTML = `
@@ -161,7 +161,7 @@
     }));
   }
 
-  // ── Countdown updates ───────────────────────
+  // -- Countdown updates -----------------------
   function tick() {
     const now = Date.now();
     const diff = Math.max(0, launchTime - now);
