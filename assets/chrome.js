@@ -51,11 +51,11 @@
             </button>
           </div>
         </div>
-        <div class="mobile-drawer" id="drawer">
-          ${navLinks.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
-          <a href="contact.html">Book a demo</a>
-          <a href="sign-up.html" class="btn btn-primary">Join the waitlist</a>
-        </div>
+      </div>
+      <div class="mobile-drawer" id="drawer">
+        ${navLinks.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
+        <a href="contact.html">Book a demo</a>
+        <a href="sign-up.html" class="btn btn-primary">Join the waitlist</a>
       </div>`;
     const wrap = document.getElementById('nav-wrap');
     window.addEventListener('scroll', () => {
