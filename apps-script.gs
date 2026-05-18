@@ -25,6 +25,14 @@
 const SHEET_ID     = '1MRGf6Dh7BU9QziX-COxBeN-w7gDA9Y9mCtGFZlMx-hw';
 const NOTIFY_EMAIL = 'info@cenaris.com.au';
 
+// Resend API key — get this from resend.com → API Keys.
+// Store it in Apps Script project settings: Project Settings → Script Properties
+// → Add property: RESEND_API_KEY = re_xxxxxxxxxxxx
+// (Never paste the key directly here — this file is in version control.)
+function getResendApiKey() {
+  return PropertiesService.getScriptProperties().getProperty('RESEND_API_KEY') || '';
+}
+
 // ─── Form schemas ────────────────────────────────────────────────────────────
 // Each entry defines the columns shown in that form's tab, in order.
 // `[header, dataKey]` — header appears in the sheet, dataKey is the JSON
@@ -350,14 +358,39 @@ function sendQuizResultsToUser(data) {
   </table>
 </body></html>`;
 
-  MailApp.sendEmail({
+  sendViaResend({
     to:      data.email,
-    replyTo: NOTIFY_EMAIL,
     subject: `Your Cenaris audit readiness results — ${score}/100`,
-    body:    plain,
-    htmlBody: html,
-    name:    'Cenaris',
+    plain:   plain,
+    html:    html,
   });
+}
+
+// Sends an email via Resend so it comes from info@cenaris.com.au.
+// Falls back to MailApp if no API key is set (so testRun still works before setup).
+function sendViaResend({ to, subject, plain, html }) {
+  const apiKey = getResendApiKey();
+  if (!apiKey) {
+    MailApp.sendEmail({ to, replyTo: NOTIFY_EMAIL, subject, body: plain, htmlBody: html, name: 'Cenaris' });
+    return;
+  }
+  const res = UrlFetchApp.fetch('https://api.resend.com/emails', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + apiKey },
+    payload: JSON.stringify({
+      from:    'Cenaris <' + NOTIFY_EMAIL + '>',
+      to:      [to],
+      reply_to: NOTIFY_EMAIL,
+      subject: subject,
+      text:    plain,
+      html:    html,
+    }),
+    muteHttpExceptions: true,
+  });
+  if (res.getResponseCode() >= 300) {
+    throw new Error('Resend error ' + res.getResponseCode() + ': ' + res.getContentText());
+  }
 }
 
 function escapeHtml(s) {
@@ -486,19 +519,18 @@ function sendRoiReportToUser(data) {
   </table>
 </body></html>`;
 
-  MailApp.sendEmail({
+  sendViaResend({
     to:      data.email,
-    replyTo: NOTIFY_EMAIL,
     subject: `Your Cenaris ROI estimate — ${fmtAUD(savings)}/yr in savings`,
-    body:    plain,
-    htmlBody: html,
-    name:    'Cenaris',
+    plain:   plain,
+    html:    html,
   });
 }
 
 // ─── Test helper ─────────────────────────────────────────────────────────────
 // Select `testRun` from the function dropdown and click Run.
 function testRun() {
+  const testEmail = 'adamstefano@hotmail.com';
   const samples = {
     partner: {
       form: 'partner',
@@ -521,7 +553,7 @@ function testRun() {
     },
     quiz: {
       form: 'quiz',
-      email: NOTIFY_EMAIL, // so you see the user-facing email too
+      email: testEmail,
       score: 64,
       band: 'MOSTLY READY',
       headline: 'Mostly there — a few real risks.',
@@ -538,7 +570,7 @@ function testRun() {
     },
     roi: {
       form: 'roi',
-      email: NOTIFY_EMAIL,
+      email: testEmail,
       intent: 'book_call',
       plan_name: 'Tier 2 Assurance',
       plan_monthly: 349,

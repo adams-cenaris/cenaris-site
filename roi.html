@@ -90,7 +90,10 @@
 
         <div style="margin-top:18px;padding:18px;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-200)">
           <label for="roi-email" style="display:block;font-size:13px;font-weight:600;color:var(--gray-800);margin-bottom:6px">Want a copy of these numbers? <span style="color:var(--gray-500);font-weight:400">(optional)</span></label>
-          <input class="input" type="email" id="roi-email" placeholder="you@org.com" autocomplete="email" style="width:100%;margin-bottom:12px"/>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input class="input" type="email" id="roi-email" placeholder="you@org.com" autocomplete="email" style="flex:1;min-width:0"/>
+            <button class="btn btn-primary" id="roi-send" type="button" style="white-space:nowrap;flex-shrink:0">Send me these →</button>
+          </div>
           <div style="display:grid;gap:10px">
             <a href="https://calendly.com/adam-cenaris" target="_blank" rel="noopener" class="btn btn-primary" id="roi-book" style="justify-content:center">Book a call about this plan <span class="arrow">→</span></a>
             <a href="sign-up.html" class="btn btn-secondary" id="roi-waitlist" style="justify-content:center">Join the waitlist</a>
@@ -266,6 +269,38 @@ function captureRoiClick(intent, destinationHref, newTab) {
 
   return true;
 }
+
+document.getElementById('roi-send').addEventListener('click', function () {
+  const emailEl = document.getElementById('roi-email');
+  const msgEl   = document.getElementById('roi-cta-msg');
+  const email   = (emailEl.value || '').trim();
+
+  if (!email) {
+    msgEl.style.color = 'var(--red-600)';
+    msgEl.textContent = 'Please enter your email address.';
+    msgEl.style.display = 'block';
+    emailEl.focus();
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    msgEl.style.color = 'var(--red-600)';
+    msgEl.textContent = 'That email doesn\'t look right — please check it.';
+    msgEl.style.display = 'block';
+    emailEl.focus();
+    return;
+  }
+
+  const payload = Object.assign({ form: 'roi', email, intent: 'email_results' }, ROI_STATE);
+  if (window.cenarisForms && typeof window.cenarisForms.submit === 'function') {
+    window.cenarisForms.submit('roi', payload).catch(() => {});
+  }
+
+  this.disabled = true;
+  this.textContent = 'Sent ✓';
+  msgEl.style.color = 'var(--green-700)';
+  msgEl.textContent = '✓ On its way — check your inbox shortly.';
+  msgEl.style.display = 'block';
+});
 
 document.getElementById('roi-book').addEventListener('click', function (e) {
   if (!captureRoiClick('book_call', this.href, true)) e.preventDefault();
