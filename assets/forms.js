@@ -80,6 +80,7 @@
       const data = { form: formName };
       form.querySelectorAll('[name]').forEach(el => {
         if (el.type === 'checkbox') data[el.name] = el.checked ? (el.value || 'on') : '';
+        else if (el.type === 'radio') { if (el.checked) data[el.name] = el.value; }
         else data[el.name] = el.value;
       });
 

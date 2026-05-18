@@ -38,6 +38,19 @@ function getResendApiKey() {
 // `[header, dataKey]` — header appears in the sheet, dataKey is the JSON
 // field name posted from the website form.
 const FORM_SCHEMAS = {
+  waitlist: {
+    label: 'waitlist signup',
+    columns: [
+      ['Full name',         'fullName'],
+      ['Email',             'email'],
+      ['Organisation',      'organisation'],
+      ['Role',              'role'],
+      ['Organisation type', 'orgType'],
+      ['Staff count',       'staff'],
+      ['Pain point',        'painPoint'],
+      ['Partner interest',  'partnerInterest'],
+    ],
+  },
   partner: {
     label: 'partner application',
     columns: [
@@ -532,6 +545,17 @@ function sendRoiReportToUser(data) {
 function testRun() {
   const testEmail = 'adamstefano@hotmail.com';
   const samples = {
+    waitlist: {
+      form: 'waitlist',
+      fullName: 'Test Waitlist',
+      email: testEmail,
+      organisation: 'Acme Disability Services',
+      role: 'Compliance Manager',
+      orgType: 'NDIS provider',
+      staff: '11–50',
+      painPoint: 'Evidence is scattered across shared drives and no one can find it before an audit.',
+      partnerInterest: 'yes',
+    },
     partner: {
       form: 'partner',
       fullName: 'Test Partner',

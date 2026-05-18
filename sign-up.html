@@ -28,33 +28,34 @@
         </div>
       </div>
 
-      <form id="wl-form" class="card" style="padding:36px" onsubmit="event.preventDefault();document.getElementById('wl-form').style.display='none';document.getElementById('wl-thanks').style.display='block';">
+      <form id="wl-form" class="card" style="padding:36px" data-cenaris-form="waitlist">
         <h2 style="font-size:22px;margin-bottom:8px">Join the waitlist</h2>
         <p style="color:var(--gray-600);font-size:14px;margin-bottom:24px">Takes about 60 seconds.</p>
         <div class="field-row">
-          <div class="field"><label>Full name</label><input class="input" required/></div>
-          <div class="field"><label>Work email</label><input class="input" type="email" required/></div>
+          <div class="field"><label>Full name</label><input class="input" name="fullName" required/></div>
+          <div class="field"><label>Work email</label><input class="input" name="email" type="email" required/></div>
         </div>
-        <div class="field"><label>Organisation name</label><input class="input" required/></div>
+        <div class="field"><label>Organisation name</label><input class="input" name="organisation" required/></div>
         <div class="field-row">
-          <div class="field"><label>Role</label><select class="select"><option>Compliance Manager</option><option>CEO / Director</option><option>Quality Lead</option><option>Other</option></select></div>
-          <div class="field"><label>Organisation type</label><select class="select"><option>NDIS provider</option><option>Allied health clinic</option><option>Aged care service</option><option>Disability organisation</option><option>Community health</option><option>Other</option></select></div>
+          <div class="field"><label>Role</label><select class="select" name="role"><option>Compliance Manager</option><option>CEO / Director</option><option>Quality Lead</option><option>Other</option></select></div>
+          <div class="field"><label>Organisation type</label><select class="select" name="orgType"><option>NDIS provider</option><option>Allied health clinic</option><option>Aged care service</option><option>Disability organisation</option><option>Community health</option><option>Other</option></select></div>
         </div>
         <div class="field"><label>Approx. number of staff</label>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-            <label class="seg-radio"><input type="radio" name="staff" checked/>1–10</label>
-            <label class="seg-radio"><input type="radio" name="staff"/>11–50</label>
-            <label class="seg-radio"><input type="radio" name="staff"/>51–200</label>
-            <label class="seg-radio"><input type="radio" name="staff"/>200+</label>
+            <label class="seg-radio"><input type="radio" name="staff" value="1–10" checked/>1–10</label>
+            <label class="seg-radio"><input type="radio" name="staff" value="11–50"/>11–50</label>
+            <label class="seg-radio"><input type="radio" name="staff" value="51–200"/>51–200</label>
+            <label class="seg-radio"><input type="radio" name="staff" value="200+"/>200+</label>
           </div>
         </div>
-        <div class="field"><label>What's your single biggest compliance pain right now? <span style="color:var(--gray-500);font-weight:400">(optional)</span></label><textarea class="textarea" placeholder="e.g. evidence is everywhere; can't see gaps; consultants are expensive…"></textarea></div>
-        <label class="checkbox" style="margin-bottom:24px"><input type="checkbox"/> Tell me about the partner program too</label>
+        <div class="field"><label>What's your single biggest compliance pain right now? <span style="color:var(--gray-500);font-weight:400">(optional)</span></label><textarea class="textarea" name="painPoint" placeholder="e.g. evidence is everywhere; can't see gaps; consultants are expensive…"></textarea></div>
+        <label class="checkbox" style="margin-bottom:24px"><input type="checkbox" name="partnerInterest" value="yes"/> Tell me about the partner program too</label>
+        <div data-form-error style="display:none;color:#DC2626;font-size:14px;margin-bottom:16px"></div>
         <button class="btn btn-primary btn-lg" type="submit" style="width:100%;justify-content:center">Join the waitlist <span class="arrow">→</span></button>
         <p style="font-size:12px;color:var(--gray-500);margin-top:16px;text-align:center">We will never sell, rent or share your details. Privacy Act 1988 &amp; APP compliant.</p>
       </form>
 
-      <div id="wl-thanks" class="card" style="display:none;padding:36px;text-align:center">
+      <div id="wl-thanks" data-form-success class="card" style="display:none;padding:36px;text-align:center">
         <div style="width:64px;height:64px;border-radius:50%;background:var(--green-50);color:var(--green-600);display:inline-flex;align-items:center;justify-content:center;margin-bottom:18px">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
@@ -86,6 +87,7 @@
 </style>
 
 <script>window.CENARIS_PAGE = 'home';</script>
+<script src="assets/forms.js"></script>
 <script src="assets/chrome.js"></script>
 </body>
 </html>
