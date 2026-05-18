@@ -23,7 +23,7 @@
   </section>
 
   <section class="section" style="padding-top:0" data-screen-label="02 Calc — Tool">
-    <div class="container" style="display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:start">
+    <div class="container rg-2" style="display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:start">
       <!-- Inputs -->
       <div class="card" style="padding:32px">
         <h2 style="font-size:20px;margin-bottom:6px">Your organisation</h2>
@@ -109,7 +109,7 @@
     <div class="container" style="max-width:880px">
       <span class="eyebrow"><span class="dot"></span>Assumptions, in plain English</span>
       <h2 style="margin:14px 0 20px">How we model the numbers.</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div class="rg-2" style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
         <div class="card-flat"><strong>Staff hours</strong><p style="font-size:14px;color:var(--gray-600);margin-top:6px">Cenaris typically reduces ongoing compliance admin by <strong>50–65%</strong> by eliminating manual evidence collection, version tracking, and search.</p></div>
         <div class="card-flat"><strong>Audit prep</strong><p style="font-size:14px;color:var(--gray-600);margin-top:6px">Prep windows shrink from <strong>weeks to days</strong> with mapped evidence and auditor read-only access. We model a 70% reduction.</p></div>
         <div class="card-flat"><strong>Consultants</strong><p style="font-size:14px;color:var(--gray-600);margin-top:6px">External spend drops as gap analysis and remediation move in-house. We model a 40% reduction year one.</p></div>
@@ -310,6 +310,12 @@ document.getElementById('roi-waitlist').addEventListener('click', function (e) {
 });
 </script>
 
+<style>
+@media (max-width: 900px) {
+  /* Output column: remove sticky so it flows below the inputs naturally */
+  .rg-2 > div[style*="position:sticky"] { position: static !important; top: auto !important; }
+}
+</style>
 <script>window.CENARIS_PAGE = 'calc';</script>
 <script src="assets/chrome.js"></script>
 <script src="assets/forms.js"></script>

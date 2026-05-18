@@ -418,3 +418,39 @@ p:last-child { margin-bottom: 0; }
 .kpi-tile .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; opacity: 0.7; }
 .kpi-tile .value { font-size: 38px; font-weight: 800; line-height: 1.05; margin-top: 6px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .kpi-tile .sub { font-size: 13px; margin-top: 4px; opacity: 0.75; }
+
+/* ── Responsive grid helpers ─────────────────── */
+/* Classes added alongside inline grid styles — media queries use !important
+   to override the inline style's grid-template-columns at mobile widths.   */
+.rg-2    { display: grid; }
+.rg-3    { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.rg-3lg  { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.rg-4    { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; }
+.rg-4-seg { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.rg-sidebar { display: grid; grid-template-columns: 240px 1fr; gap: 48px; }
+.rg-article { display: grid; grid-template-columns: 1fr 220px; gap: 48px; }
+.rg-author  { display: grid; grid-template-columns: auto 1fr auto; gap: 32px; align-items: center; }
+
+@media (max-width: 900px) {
+  .rg-2 { grid-template-columns: 1fr !important; gap: 32px !important; }
+  .rg-3, .rg-3lg { grid-template-columns: 1fr 1fr !important; }
+  .rg-4 { grid-template-columns: 1fr 1fr !important; }
+  .rg-author { grid-template-columns: auto 1fr !important; }
+  .rg-author > :last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .rg-sidebar, .rg-article { grid-template-columns: 1fr !important; gap: 32px !important; }
+  .rg-sidebar > aside, .rg-article > aside { position: static !important; top: auto !important; }
+}
+@media (max-width: 600px) {
+  .section { padding: 60px 0; }
+  .section-sm { padding: 40px 0; }
+  .rg-3, .rg-3lg { grid-template-columns: 1fr !important; }
+  .rg-4 { grid-template-columns: 1fr 1fr !important; }
+  .rg-4-seg { grid-template-columns: 1fr 1fr !important; }
+}
+@media (max-width: 480px) {
+  .countdown { gap: 6px; }
+  .countdown .seg { min-width: 60px; padding: 10px 4px; }
+  .countdown .seg .v { font-size: 24px; }
+}

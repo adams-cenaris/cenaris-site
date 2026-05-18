@@ -218,9 +218,9 @@ function finish() {
     QUIZ_STATE.domains[name] = v;
     const c = v>=80?'#16A34A':v>=60?'#D97706':v>=40?'#D97706':'#DC2626';
     bars.insertAdjacentHTML('beforeend', `
-      <div style="display:grid;grid-template-columns:240px 1fr 50px;gap:14px;align-items:center">
+      <div class="domain-score-row" style="display:grid;grid-template-columns:240px 1fr 50px;gap:14px;align-items:center">
         <div style="font-weight:500;color:var(--gray-800);font-size:14px">${name}</div>
-        <div class="mock-bar"><span style="width:${v}%;background:${c}"></span></div>
+        <div class="mock-bar domain-bar"><span style="width:${v}%;background:${c}"></span></div>
         <div style="font-weight:700;color:${c};text-align:right;font-variant-numeric:tabular-nums">${v}</div>
       </div>
     `);
@@ -307,6 +307,12 @@ async function emailResults() {
 }
 </script>
 
+<style>
+@media (max-width: 600px) {
+  .domain-score-row { grid-template-columns: 1fr 44px !important; gap: 10px !important; }
+  .domain-bar { display: none; }
+}
+</style>
 <script>window.CENARIS_PAGE = 'quiz';</script>
 <script src="assets/chrome.js"></script>
 <script src="assets/forms.js"></script>
