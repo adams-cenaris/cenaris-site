@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Compliance ROI Calculator | Cenaris</title>
+<meta name="description" content="Estimate the real cost of your current compliance approach — staff hours, consultants, audit prep — and the savings Cenaris could surface." />
+<meta name="theme-color" content="#4A9FCC" />
+<link rel="stylesheet" href="assets/site.css" />
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div id="prelaunch"></div>
+<div id="nav"></div>
+
+<main id="main">
+  <section class="section-sm" data-screen-label="01 Calc — Hero">
+    <div class="container" style="max-width:880px;text-align:center">
+      <span class="eyebrow"><span class="dot"></span>ROI Calculator</span>
+      <h1 style="margin:14px 0 16px">What does compliance actually cost you?</h1>
+      <p class="lede" style="margin:0 auto">Estimate the real annual cost of your current approach — staff hours, consultants, audit prep, the lot — and what structured compliance infrastructure would change.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0" data-screen-label="02 Calc — Tool">
+    <div class="container" style="display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:start">
+      <!-- Inputs -->
+      <div class="card" style="padding:32px">
+        <h2 style="font-size:20px;margin-bottom:6px">Your organisation</h2>
+        <p style="font-size:14px;color:var(--gray-600);margin-bottom:24px">Adjust the inputs — results update live.</p>
+
+        <div class="calc-row">
+          <div><label>Number of staff</label><div class="hint">FTE + part-time + casual</div></div>
+          <div class="value-wrap"><input type="number" id="i-staff" value="25" min="1" max="2000"/></div>
+        </div>
+        <div class="calc-row">
+          <div><label>Hours/week on compliance admin</label><div class="hint">Across the whole org — policies, evidence, prep</div></div>
+          <div class="value-wrap"><input type="number" id="i-hours" value="12" min="0" max="200"/></div>
+        </div>
+        <div class="calc-row">
+          <div><label>Blended hourly cost ($AUD)</label><div class="hint">Salary + super + on-costs</div></div>
+          <div class="value-wrap"><span>$</span><input type="number" id="i-rate" value="75" min="30" max="300"/></div>
+        </div>
+        <div class="calc-row">
+          <div><label>Audit prep weeks (per cycle)</label><div class="hint">Most NDIS providers re-audit every 3 yrs</div></div>
+          <div class="value-wrap"><input type="number" id="i-weeks" value="6" min="0" max="26"/></div>
+        </div>
+        <div class="calc-row">
+          <div><label>External consultant spend ($/yr)</label><div class="hint">Compliance &amp; audit prep consultants</div></div>
+          <div class="value-wrap"><span>$</span><input type="number" id="i-consult" value="18000" min="0" max="500000" step="500"/></div>
+        </div>
+        <div class="calc-row">
+          <div><label>Non-conformities last audit</label><div class="hint">Rough order; affects rectification cost</div></div>
+          <div class="value-wrap"><input type="number" id="i-noncon" value="4" min="0" max="50"/></div>
+        </div>
+
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--gray-100);display:flex;gap:10px;flex-wrap:wrap">
+          <span style="font-size:13px;color:var(--gray-600);align-self:center">Quick presets:</span>
+          <button class="btn btn-secondary btn-sm" onclick="preset(8,6,75,4,8000,2)">Small (≈8 staff)</button>
+          <button class="btn btn-secondary btn-sm" onclick="preset(25,12,75,6,18000,4)">Mid (≈25)</button>
+          <button class="btn btn-secondary btn-sm" onclick="preset(80,32,80,10,55000,8)">Large (≈80)</button>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div style="position:sticky;top:96px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+          <div class="kpi-tile" style="background:var(--gray-50);color:var(--gray-900);border:1px solid var(--gray-200)">
+            <div class="label">Current annual cost</div>
+            <div class="value" id="o-current">$0</div>
+            <div class="sub">Your status quo</div>
+          </div>
+          <div class="kpi-tile" style="background:linear-gradient(160deg,#0E1A2B,#154060);color:#fff">
+            <div class="label" style="color:rgba(255,255,255,0.7)">With Cenaris</div>
+            <div class="value" id="o-cenaris">$0</div>
+            <div class="sub" style="color:rgba(255,255,255,0.7)"><span id="o-plan">—</span></div>
+          </div>
+        </div>
+
+        <div class="kpi-tile" style="background:linear-gradient(135deg,var(--green-50),#fff);border:1.5px solid var(--green-600);color:var(--green-700);margin-bottom:18px">
+          <div class="label" style="color:var(--green-700)">Estimated annual savings</div>
+          <div class="value" id="o-savings" style="color:var(--green-700);font-size:54px">$0</div>
+          <div class="sub" style="color:var(--green-700);font-weight:600"><span id="o-pct">0</span>% reduction · payback in <span id="o-payback">—</span></div>
+        </div>
+
+        <div class="card" style="padding:24px">
+          <div style="font-weight:600;margin-bottom:14px;font-size:15px">Where the savings come from</div>
+          <div id="breakdown" style="display:grid;gap:14px"></div>
+        </div>
+
+        <div style="margin-top:18px;padding:18px;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-200)">
+          <label for="roi-email" style="display:block;font-size:13px;font-weight:600;color:var(--gray-800);margin-bottom:6px">Want a copy of these numbers? <span style="color:var(--gray-500);font-weight:400">(optional)</span></label>
+          <input class="input" type="email" id="roi-email" placeholder="you@org.com" autocomplete="email" style="width:100%;margin-bottom:12px"/>
+          <div style="display:grid;gap:10px">
+            <a href="https://calendly.com/adam-cenaris" target="_blank" rel="noopener" class="btn btn-primary" id="roi-book" style="justify-content:center">Book a call about this plan <span class="arrow">→</span></a>
+            <a href="sign-up.html" class="btn btn-secondary" id="roi-waitlist" style="justify-content:center">Join the waitlist</a>
+          </div>
+          <p id="roi-cta-msg" style="display:none;font-size:13px;color:var(--green-700);margin:10px 0 0;font-weight:600" role="status"></p>
+        </div>
+        <p class="text-muted" style="font-size:12px;margin-top:14px;text-align:center">Estimates use industry-blended ratios for NDIS providers. Not a quote.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-bg-sand" data-screen-label="03 Calc — Assumptions">
+    <div class="container" style="max-width:880px">
+      <span class="eyebrow"><span class="dot"></span>Assumptions, in plain English</span>
+      <h2 style="margin:14px 0 20px">How we model the numbers.</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+        <div class="card-flat"><strong>Staff hours</strong><p style="font-size:14px;color:var(--gray-600);margin-top:6px">Cenaris typically reduces ongoing compliance admin by <strong>50–65%</strong> by eliminating manual evidence collection, version tracking, and search.</p></div>
+        <div class="card-flat"><strong>Audit prep</strong><p style="font-size:14px;color:var(--gray-600);margin-top:6px">Prep windows shrink from <strong>weeks to days</strong> with mapped evidence and auditor read-only access. We model a 70% reduction.</p></div>
+        <div class="card-flat"><strong>Consultants</strong><p style="font-size:14px;color:var(--gray-600);margin-top:6px">External spend drops as gap analysis and remediation move in-house. We model a 40% reduction year one.</p></div>
+        <div class="card-flat"><strong>Non-conformities</strong><p style="font-size:14px;color:var(--gray-600);margin-top:6px">Each NC carries an estimated rectification + reputational cost of <strong>~$3,500</strong>. We model a 60% reduction.</p></div>
+        <div class="card-flat" style="grid-column:1/-1"><strong>Subscription cost</strong><p style="font-size:14px;color:var(--gray-600);margin-top:6px">We match staff count to our <a href="pricing.html" style="color:var(--blue-600);font-weight:600">published plans</a>: <strong>1–10 staff</strong> → Tier 1 Essentials ($149/mo) · <strong>11–50</strong> → Tier 2 Assurance ($349/mo) · <strong>51–150</strong> → Tier 3 Confidence ($699/mo) · <strong>151+</strong> → Enterprise (from $1,499/mo). All plans billed annually.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="footer"></div>
+<div id="cookie"></div>
+
+<script>
+// Plan tiers, mapped by staff count. Annual figures match /pricing.html.
+const PLANS = [
+  { maxStaff: 10,       name: 'Tier 1 Essentials',     monthly: 149,   annual: 1788  },
+  { maxStaff: 50,       name: 'Tier 2 Assurance',      monthly: 349,   annual: 4188  },
+  { maxStaff: 150,      name: 'Tier 3 Confidence',     monthly: 699,   annual: 8388  },
+  { maxStaff: Infinity, name: 'Enterprise (from)',     monthly: 1499,  annual: 17988 },
+];
+function pickPlan(staff) {
+  return PLANS.find(p => staff <= p.maxStaff) || PLANS[PLANS.length - 1];
+}
+
+// Latest computed snapshot — populated by compute(), read by the CTA capture.
+const ROI_STATE = {};
+
+const fmt = n => '$' + Math.round(n).toLocaleString('en-AU');
+const animate = (el, to, prefix='$') => {
+  const from = parseFloat(el.dataset.v || 0);
+  const start = performance.now();
+  const step = (t) => {
+    const p = Math.min(1, (t - start) / 500);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const v = from + (to - from) * eased;
+    el.textContent = prefix + Math.round(v).toLocaleString('en-AU');
+    if (p < 1) requestAnimationFrame(step);
+    else el.dataset.v = to;
+  };
+  requestAnimationFrame(step);
+};
+
+function compute() {
+  const staff = +document.getElementById('i-staff').value || 0;
+  const hours = +document.getElementById('i-hours').value || 0;
+  const rate = +document.getElementById('i-rate').value || 0;
+  const weeks = +document.getElementById('i-weeks').value || 0;
+  const consult = +document.getElementById('i-consult').value || 0;
+  const noncon = +document.getElementById('i-noncon').value || 0;
+
+  // Current costs
+  const ongoingNow = hours * rate * 52;
+  const auditNow = (weeks * 40 * rate) / 3;     // amortised over 3-yr cycle
+  const consultNow = consult;
+  const ncNow = noncon * 3500 / 3;              // amortised
+  const totalNow = ongoingNow + auditNow + consultNow + ncNow;
+
+  // After Cenaris
+  const ongoingNew = ongoingNow * 0.45;
+  const auditNew = auditNow * 0.30;
+  const consultNew = consultNow * 0.60;
+  const ncNew = ncNow * 0.40;
+  const plan = pickPlan(staff);
+  const subscription = plan.annual;
+  const totalNew = ongoingNew + auditNew + consultNew + ncNew + subscription;
+
+  const savings = Math.max(0, totalNow - totalNew);
+  const pct = totalNow > 0 ? Math.round(savings / totalNow * 100) : 0;
+  const payback = subscription > 0 ? (subscription / Math.max(1, savings/12)).toFixed(1) : '—';
+
+  animate(document.getElementById('o-current'), totalNow);
+  animate(document.getElementById('o-cenaris'), totalNew);
+  animate(document.getElementById('o-savings'), savings);
+  document.getElementById('o-pct').textContent = pct;
+  document.getElementById('o-payback').textContent = (savings > 0 && payback !== '—') ? `${payback} months` : '—';
+  document.getElementById('o-plan').textContent = `${plan.name} · $${plan.monthly}/mo · billed annually`;
+
+  // Stash everything for the CTA capture handlers.
+  Object.assign(ROI_STATE, {
+    staff, hours, rate, weeks, consult, noncon,
+    plan_name: plan.name,
+    plan_monthly: plan.monthly,
+    plan_annual: plan.annual,
+    current_cost: Math.round(totalNow),
+    cenaris_cost: Math.round(totalNew),
+    savings: Math.round(savings),
+    savings_pct: pct,
+    payback_months: payback,
+  });
+
+  // Breakdown bars
+  const items = [
+    ['Staff hours saved', ongoingNow - ongoingNew, '#4A9FCC'],
+    ['Audit prep saved',  auditNow - auditNew,    '#16A34A'],
+    ['Consultant spend',  consultNow - consultNew,'#D97706'],
+    ['Non-conformities',  ncNow - ncNew,          '#7C3AED'],
+  ];
+  const max = Math.max(1, ...items.map(i=>i[1]));
+  const wrap = document.getElementById('breakdown');
+  wrap.innerHTML = items.map(([label,v,c])=>`
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+        <span style="color:var(--gray-700)">${label}</span>
+        <strong style="color:var(--gray-900);font-variant-numeric:tabular-nums">${fmt(v)}</strong>
+      </div>
+      <div class="mock-bar"><span style="width:${(v/max)*100}%;background:${c}"></span></div>
+    </div>
+  `).join('');
+}
+
+function preset(s,h,r,w,c,n) {
+  document.getElementById('i-staff').value = s;
+  document.getElementById('i-hours').value = h;
+  document.getElementById('i-rate').value = r;
+  document.getElementById('i-weeks').value = w;
+  document.getElementById('i-consult').value = c;
+  document.getElementById('i-noncon').value = n;
+  compute();
+}
+
+document.querySelectorAll('#i-staff, #i-hours, #i-rate, #i-weeks, #i-consult, #i-noncon').forEach(el => el.addEventListener('input', compute));
+compute();
+
+// ── CTA capture: send {ROI inputs + outputs + email + intent} to Apps Script
+// when the user clicks either button, then continue to the destination.
+// Uses fetch with keepalive:true so the request survives the navigation.
+function captureRoiClick(intent, destinationHref, newTab) {
+  const emailEl = document.getElementById('roi-email');
+  const msgEl   = document.getElementById('roi-cta-msg');
+  const email   = (emailEl.value || '').trim();
+
+  // Mild email validation. Empty email is fine — we still capture anonymously.
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    msgEl.style.color = 'var(--red-600)';
+    msgEl.textContent = 'That email doesn\'t look right — fix it or leave it blank.';
+    msgEl.style.display = 'block';
+    emailEl.focus();
+    return false; // block navigation
+  }
+
+  const payload = Object.assign({ form: 'roi', email, intent }, ROI_STATE);
+
+  // Fire-and-forget. cenarisForms.submit uses fetch under the hood; we don't
+  // await — navigation continues immediately and the request finishes in the
+  // background thanks to the browser's standard fetch lifetime.
+  if (window.cenarisForms && window.cenarisForms.submit) {
+    window.cenarisForms.submit('roi', payload).catch(() => {});
+  }
+
+  // Soft confirmation for same-tab navigation (waitlist).
+  if (email && !newTab) {
+    msgEl.style.color = 'var(--green-700)';
+    msgEl.textContent = '✓ Saved — we\'ll email you a copy.';
+    msgEl.style.display = 'block';
+  }
+
+  return true;
+}
+
+document.getElementById('roi-book').addEventListener('click', function (e) {
+  if (!captureRoiClick('book_call', this.href, true)) e.preventDefault();
+});
+document.getElementById('roi-waitlist').addEventListener('click', function (e) {
+  if (!captureRoiClick('join_waitlist', this.href, false)) e.preventDefault();
+});
+</script>
+
+<script>window.CENARIS_PAGE = 'calc';</script>
+<script src="assets/chrome.js"></script>
+<script src="assets/forms.js"></script>
+</body>
+</html>
