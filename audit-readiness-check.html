@@ -1,11 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en-AU">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Audit Readiness Check — 2-Minute Quiz | Cenaris</title>
+<title>Audit Readiness Check â€” 2-Minute Quiz | Cenaris</title>
 <meta name="description" content="A 2-minute, 10-question check across the four NDIS Practice Standards. Get an instant readiness score and plain-English summary of where to focus first." />
 <meta name="theme-color" content="#4A9FCC" />
+<link rel="icon" href="assets/favicon-icon.png" />
 <link rel="stylesheet" href="assets/site.css" />
 </head>
 <body>
@@ -16,40 +17,40 @@
 <main id="main">
 
   <!-- INTRO -->
-  <section class="section" id="intro" data-screen-label="01 Quiz — Intro">
+  <section class="section" id="intro" data-screen-label="01 Quiz â€” Intro">
     <div class="container" style="max-width:760px;text-align:center">
       <span class="eyebrow"><span class="dot"></span>Audit Readiness Check</span>
       <h1 style="margin:14px 0 18px">How audit-ready are you?</h1>
       <p class="lede" style="margin:0 auto">A 2-minute, 10-question check across the four NDIS Practice Standards domains. Get an instant readiness score and a plain-English summary of where to focus first.</p>
       <div style="display:flex;gap:32px;justify-content:center;margin:36px 0 32px;flex-wrap:wrap;color:var(--gray-600);font-size:14px">
-        <span>⏱ 2 minutes</span>
-        <span>📋 10 questions</span>
-        <span>📊 Instant score</span>
+        <span>â± 2 minutes</span>
+        <span>ðŸ“‹ 10 questions</span>
+        <span>ðŸ“Š Instant score</span>
       </div>
-      <button class="btn btn-primary btn-lg" onclick="startQuiz()">Start the check →</button>
-      <p class="text-muted" style="margin-top:14px;font-size:13px">Self-assessment only — not an audit, certification or regulatory assessment.</p>
+      <button class="btn btn-primary btn-lg" onclick="startQuiz()">Start the check â†’</button>
+      <p class="text-muted" style="margin-top:14px;font-size:13px">Self-assessment only â€” not an audit, certification or regulatory assessment.</p>
     </div>
   </section>
 
   <!-- QUIZ -->
-  <section class="section" id="quiz" style="display:none" data-screen-label="02 Quiz — Questions">
+  <section class="section" id="quiz" style="display:none" data-screen-label="02 Quiz â€” Questions">
     <div class="container" style="max-width:680px">
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px">
         <span class="tag blue" id="q-counter">Question 1 of 10</span>
         <div class="quiz-progress" style="flex:1"><span id="q-progress" style="width:10%"></span></div>
         <span style="font-size:12px;color:var(--gray-500);font-weight:600" id="q-domain">Rights &amp; responsibilities</span>
       </div>
-      <h2 id="q-text" style="font-size:30px;line-height:1.25;margin-bottom:28px">Loading…</h2>
+      <h2 id="q-text" style="font-size:30px;line-height:1.25;margin-bottom:28px">Loadingâ€¦</h2>
       <div id="q-options" class="quiz-mock-options" style="display:grid;gap:12px;margin-bottom:24px"></div>
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <button class="btn btn-ghost" id="q-back" onclick="back()" style="visibility:hidden">← Back</button>
-        <button class="btn btn-secondary btn-sm" onclick="skip()">Not sure — skip</button>
+        <button class="btn btn-ghost" id="q-back" onclick="back()" style="visibility:hidden">â† Back</button>
+        <button class="btn btn-secondary btn-sm" onclick="skip()">Not sure â€” skip</button>
       </div>
     </div>
   </section>
 
   <!-- RESULTS -->
-  <section class="section" id="results" style="display:none" data-screen-label="03 Quiz — Results">
+  <section class="section" id="results" style="display:none" data-screen-label="03 Quiz â€” Results">
     <div class="container" style="max-width:980px">
       <div style="text-align:center;margin-bottom:48px">
         <span class="eyebrow"><span class="dot"></span>Your results</span>
@@ -64,12 +65,12 @@
             <circle id="score-ring" cx="100" cy="100" r="84" stroke="#16A34A" stroke-width="16" fill="none"
               stroke-linecap="round" stroke-dasharray="528 528" transform="rotate(-90 100 100)" style="transition:stroke-dasharray 800ms cubic-bezier(0,0,0.2,1), stroke 400ms"/>
             <text x="100" y="95" id="score-num" text-anchor="middle" font-size="54" font-weight="800" fill="#0E1A2B">0</text>
-            <text x="100" y="120" id="score-band" text-anchor="middle" font-size="13" font-weight="600" fill="#6E7787" letter-spacing="2">CALCULATING…</text>
+            <text x="100" y="120" id="score-band" text-anchor="middle" font-size="13" font-weight="600" fill="#6E7787" letter-spacing="2">CALCULATINGâ€¦</text>
           </svg>
           <div style="margin-top:8px;font-size:14px;color:var(--gray-500)">Readiness score out of 100</div>
         </div>
         <div>
-          <h2 id="result-headline" style="font-size:28px;line-height:1.2;margin-bottom:16px">—</h2>
+          <h2 id="result-headline" style="font-size:28px;line-height:1.2;margin-bottom:16px">â€”</h2>
           <p id="result-body" style="color:var(--gray-700);font-size:16px;line-height:1.65"></p>
         </div>
       </div>
@@ -88,7 +89,7 @@
         <h3 style="color:#fff;font-size:24px;margin-bottom:8px">Want a personalised walk-through?</h3>
         <p style="color:rgba(255,255,255,0.8);margin-bottom:24px;max-width:48ch;margin-left:auto;margin-right:auto">Adam, our founder, runs a 20-minute walk-through of your results and the evidence Cenaris would surface.</p>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-          <a href="https://calendly.com/adam-cenaris" target="_blank" rel="noopener" class="btn btn-on-dark btn-lg">Book a call with Adam <span class="arrow">→</span></a>
+          <a href="https://calendly.com/adam-cenaris" target="_blank" rel="noopener" class="btn btn-on-dark btn-lg">Book a call with Adam <span class="arrow">â†’</span></a>
           <a href="sign-up.html" class="btn btn-on-dark-secondary btn-lg">Join the waitlist</a>
         </div>
         <div style="margin-top:32px;border-top:1px solid rgba(255,255,255,0.1);padding-top:24px">
@@ -186,10 +187,10 @@ function finish() {
   const ringEl = document.getElementById('score-ring');
   const bandEl = document.getElementById('score-band');
   let band, ringColor, headline, body;
-  if (score >= 80) { band='AUDIT READY'; ringColor='#16A34A'; headline="You're in good shape."; body="Your systems look defensible. Focus on continuous improvement and tightening the smaller gaps highlighted below — Cenaris can keep that visibility live so you don't drift."; }
-  else if (score >= 60) { band='MOSTLY READY'; ringColor='#D97706'; headline='Mostly there — a few real risks.'; body='You have foundations in place but specific domains will be exposed in an audit. Address the focus areas below before your next cycle.'; }
-  else if (score >= 40) { band='NEEDS WORK'; ringColor='#D97706'; headline='Meaningful gaps to close.'; body='An unannounced audit would be uncomfortable. Several domains rely on memory or scramble. Cenaris is designed to turn this around in 60–90 days.'; }
-  else { band='HIGH RISK'; ringColor='#DC2626'; headline='High audit risk right now.'; body='Compliance visibility appears reactive. Structured infrastructure is the fastest way back to defensible — start with the three focus areas below.'; }
+  if (score >= 80) { band='AUDIT READY'; ringColor='#16A34A'; headline="You're in good shape."; body="Your systems look defensible. Focus on continuous improvement and tightening the smaller gaps highlighted below â€” Cenaris can keep that visibility live so you don't drift."; }
+  else if (score >= 60) { band='MOSTLY READY'; ringColor='#D97706'; headline='Mostly there â€” a few real risks.'; body='You have foundations in place but specific domains will be exposed in an audit. Address the focus areas below before your next cycle.'; }
+  else if (score >= 40) { band='NEEDS WORK'; ringColor='#D97706'; headline='Meaningful gaps to close.'; body='An unannounced audit would be uncomfortable. Several domains rely on memory or scramble. Cenaris is designed to turn this around in 60â€“90 days.'; }
+  else { band='HIGH RISK'; ringColor='#DC2626'; headline='High audit risk right now.'; body='Compliance visibility appears reactive. Structured infrastructure is the fastest way back to defensible â€” start with the three focus areas below.'; }
   bandEl.textContent = band;
   ringEl.setAttribute('stroke', ringColor);
   QUIZ_STATE.band = band;
@@ -226,7 +227,7 @@ function finish() {
     `);
   });
 
-  // Focus areas — weakest 3 questions
+  // Focus areas â€” weakest 3 questions
   const sorted = QUESTIONS.map((q,i)=>({q,v:valid[i],i})).sort((a,b)=>a.v-b.v).slice(0,3);
   QUIZ_STATE.focusAreas = sorted.map(s => ({ text: s.q.t, domain: s.q.d }));
   const focus = document.getElementById('focus-list');
@@ -244,7 +245,7 @@ function finish() {
   });
 }
 
-// ── Email the user their results (via Apps Script). ─────────────────
+// â”€â”€ Email the user their results (via Apps Script). â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function emailResults() {
   const input = document.getElementById('quiz-email');
   const btn   = document.getElementById('quiz-email-btn');
@@ -265,7 +266,7 @@ async function emailResults() {
 
   btn.disabled = true;
   const origLabel = btn.textContent;
-  btn.textContent = 'Sending…';
+  btn.textContent = 'Sendingâ€¦';
 
   // Flatten domain scores + focus areas into stable keys.
   const payload = {
@@ -295,7 +296,7 @@ async function emailResults() {
   const result = await window.cenarisForms.submit('quiz', payload);
   if (result && result.ok) {
     form.style.display = 'none';
-    msg.innerHTML = '✓ Sent — check your inbox (and spam folder just in case).';
+    msg.innerHTML = 'âœ“ Sent â€” check your inbox (and spam folder just in case).';
     msg.style.display = 'block';
   } else {
     msg.textContent = 'Something went wrong. Please try again, or email info@cenaris.com.au.';
