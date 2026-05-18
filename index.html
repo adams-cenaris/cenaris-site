@@ -600,6 +600,11 @@
   .hero-grid { grid-template-columns: 1fr; gap: 32px; padding-bottom: 48px; }
   .mock-card-float { position: static; margin-top: 16px; }
 }
+@media (max-width: 600px) {
+  .mock-std { grid-template-columns: minmax(0, 1fr) auto; }
+  .mock-bar { display: none; }
+  .mock-mini-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
 
 /* Problem */
 .problem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 56px; }

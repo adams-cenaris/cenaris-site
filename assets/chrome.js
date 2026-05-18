@@ -82,7 +82,7 @@
               </div>
               <p><strong style="color:#fff">Compliance, Simplified.</strong><br/>
               We are currently in the final stages of development, focused on the NDIS Practice Standards. We aim to provide more frameworks in the near future. Spots are limited on the early-bird list for our 1 July 2026 launch — enquire now to secure your spot.</p>
-              <div class="au" style="white-space:nowrap">
+              <div class="au">
                 <svg width="24" height="12" viewBox="0 0 60 30" style="border-radius:2px;display:inline-block;flex-shrink:0" aria-label="Australian flag" role="img">
                   <rect width="60" height="30" fill="#012169"/>
                   <clipPath id="au-canton"><rect width="30" height="15"/></clipPath>

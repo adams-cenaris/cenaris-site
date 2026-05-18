@@ -76,7 +76,7 @@
 }
 
 * , *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; overflow-x: hidden; }
 body {
   margin: 0;
   font-family: var(--font-sans);
@@ -224,6 +224,7 @@ p:last-child { margin-bottom: 0; }
 @media (max-width: 800px) {
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px 24px; }
   .footer-brand { grid-column: 1 / -1; }
+  .footer-brand .au { white-space: normal !important; }
 }
 
 /* ── Cards ──────────────────────────────────── */
