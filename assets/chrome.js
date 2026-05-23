@@ -80,7 +80,7 @@
               <div class="footer-logo">
                 <img src="assets/logo-horizontal-white.png" alt="Cenaris" style="height:32px;width:auto;display:block"/>
               </div>
-              <p><strong style="color:#fff">Compliance, Simplified.</strong><br/>
+              <p><strong style="color:#fff">Be Audit Ready, Everyday.</strong><br/>
               We are currently in the final stages of development, focused on the NDIS Practice Standards. We aim to provide more frameworks in the near future. Spots are limited on the early-bird list for our 1 July 2026 launch &mdash; enquire now to secure your spot.</p>
               <div class="au">
                 <svg width="24" height="12" viewBox="0 0 60 30" style="border-radius:2px;display:inline-block;flex-shrink:0" aria-label="Australian flag" role="img">
