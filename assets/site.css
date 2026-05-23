@@ -116,11 +116,8 @@ button { font: inherit; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--blue-600);
-  display: inline-flex; align-items: center; gap: 8px;
 }
-.eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-400); }
 .eyebrow.on-dark { color: #9FCDE9; }
-.eyebrow.on-dark .dot { background: var(--blue-300); }
 
 h1, h2, h3, h4, h5 { font-family: var(--font-sans); color: var(--gray-900); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
 .h1, h1 { font-size: clamp(40px, 5.6vw, 68px); font-weight: 700; line-height: 1.04; letter-spacing: -0.03em; }
