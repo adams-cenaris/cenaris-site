@@ -104,6 +104,11 @@
         });
         const json = await res.json().catch(() => ({ ok: res.ok }));
         if (!json.ok) throw new Error(json.error || 'Submission failed');
+        // Track conversion — form type only, no PII.
+        try {
+          if (typeof window.trackLeadFormSubmit === 'function') window.trackLeadFormSubmit(formName);
+          if (formName === 'waitlist' && typeof window.trackWaitlistSubmit === 'function') window.trackWaitlistSubmit('form');
+        } catch(_) {}
         if (thanksUrl) {
           window.location.href = thanksUrl;
         } else {

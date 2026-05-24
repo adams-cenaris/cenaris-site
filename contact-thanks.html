@@ -38,8 +38,12 @@
 <div id="footer"></div>
 <div id="cookie"></div>
 <script>window.CENARIS_PAGE = 'contact';</script>
+<script src="assets/analytics.js"></script>
 <script src="assets/chrome.js"></script>
 
-<!-- Analytics conversion hook: fire 'contact_message_submitted' here when GA4 is wired up. -->
+<script>
+  // Conversion anchor: fires when user reaches this page after form submission.
+  if (typeof window.trackEvent === 'function') window.trackEvent('contact_form_submit', { page_location: window.location.pathname });
+</script>
 </body>
 </html>

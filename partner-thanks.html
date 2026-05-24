@@ -47,12 +47,12 @@
 <div id="footer"></div>
 <div id="cookie"></div>
 <script>window.CENARIS_PAGE = 'partner';</script>
+<script src="assets/analytics.js"></script>
 <script src="assets/chrome.js"></script>
 
-<!-- Google Analytics / GTM conversion event hook.
-     If you wire up GA4 or another analytics tag in chrome.js, fire a
-     'partner_application_submitted' event from here. Example:
-     <script>window.gtag && gtag('event','partner_application_submitted');</script>
--->
+<script>
+  // Conversion anchor: fires when user reaches this page after form submission.
+  if (typeof window.trackEvent === 'function') window.trackEvent('partner_enquiry_submit', { page_location: window.location.pathname });
+</script>
 </body>
 </html>

@@ -268,6 +268,9 @@ function captureRoiClick(intent, destinationHref, newTab) {
     msgEl.style.display = 'block';
   }
 
+  // Track ROI completion — intent only, no dollar amounts or personal data.
+  try { if (typeof window.trackROICalculatorComplete === 'function') window.trackROICalculatorComplete(intent); } catch(_) {}
+
   return true;
 }
 
@@ -301,6 +304,7 @@ document.getElementById('roi-send').addEventListener('click', function () {
   msgEl.style.color = 'var(--green-700)';
   msgEl.textContent = '&#10003; On its way. Check your inbox shortly.';
   msgEl.style.display = 'block';
+  try { if (typeof window.trackROICalculatorComplete === 'function') window.trackROICalculatorComplete('email_results'); } catch(_) {}
 });
 
 document.getElementById('roi-book').addEventListener('click', function (e) {
@@ -318,6 +322,7 @@ document.getElementById('roi-waitlist').addEventListener('click', function (e) {
 }
 </style>
 <script>window.CENARIS_PAGE = 'calc';</script>
+<script src="assets/analytics.js"></script>
 <script src="assets/chrome.js"></script>
 <script src="assets/forms.js"></script>
 </body>

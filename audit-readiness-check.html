@@ -298,6 +298,8 @@ async function emailResults() {
     form.style.display = 'none';
     msg.innerHTML = '&#10003; Sent. Check your inbox (and spam folder just in case).';
     msg.style.display = 'block';
+    // Track completion — score band only, no raw score or email.
+    try { if (typeof window.trackAuditScreenerComplete === 'function') window.trackAuditScreenerComplete(QUIZ_STATE.band); } catch(_) {}
   } else {
     msg.textContent = 'Something went wrong. Please try again, or email info@cenaris.com.au.';
     msg.style.color = '#FCA5A5';
@@ -315,6 +317,7 @@ async function emailResults() {
 }
 </style>
 <script>window.CENARIS_PAGE = 'quiz';</script>
+<script src="assets/analytics.js"></script>
 <script src="assets/chrome.js"></script>
 <script src="assets/forms.js"></script>
 </body>

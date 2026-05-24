@@ -157,6 +157,9 @@
       </div>`;
     cookieEl.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
       localStorage.setItem('cenaris-cookie', b.dataset.cookie);
+      if (b.dataset.cookie === 'accept' && typeof window.cenarisCookieAccept === 'function') {
+        window.cenarisCookieAccept();
+      }
       cookieEl.innerHTML = '';
     }));
   }
