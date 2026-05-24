@@ -320,41 +320,59 @@ function sendQuizResultsToUser(data) {
 
   const html = `
 <!DOCTYPE html>
-<html><body style="margin:0;padding:0;background:#F5F6F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#231F20">
-  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#F5F6F8;padding:32px 12px">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Your Cenaris Audit Readiness Results</title>
+  <style>
+    body,table,td{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}
+    table,td{mso-table-lspace:0pt;mso-table-rspace:0pt}
+    @media only screen and (max-width:620px){
+      .email-outer{padding:0 !important}
+      .email-card{border-radius:0 !important;border-left:none !important;border-right:none !important}
+      .email-pad{padding-left:20px !important;padding-right:20px !important}
+      .email-h1{font-size:19px !important}
+      .score-big{font-size:34px !important}
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#F5F6F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#231F20">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" class="email-outer" style="background:#F5F6F8;padding:32px 12px">
     <tr><td align="center">
-      <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width:600px;background:#FFFFFF;border-radius:12px;overflow:hidden;border:1px solid #DDE0E7">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" class="email-card" style="max-width:600px;background:#FFFFFF;border-radius:12px;overflow:hidden;border:1px solid #DDE0E7">
 
-        <tr><td style="padding:28px 32px 0 32px">
+        <tr><td class="email-pad" style="padding:28px 32px 0 32px">
           <div style="font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#4A9FCC">Cenaris · Audit Readiness Check</div>
-          <h1 style="font-size:22px;font-weight:700;line-height:1.3;margin:14px 0 6px 0;color:#231F20">Your audit readiness results</h1>
+          <h1 class="email-h1" style="font-size:22px;font-weight:700;line-height:1.3;margin:14px 0 6px 0;color:#231F20">Your audit readiness results</h1>
           <p style="margin:0;color:#6E7787;font-size:14px;line-height:1.55">${escapeHtml(headline)}</p>
         </td></tr>
 
-        <tr><td style="padding:24px 32px">
+        <tr><td class="email-pad" style="padding:24px 32px">
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#F5F6F8;border-radius:10px">
             <tr>
-              <td style="padding:24px 28px" align="left">
+              <td class="email-pad" style="padding:24px 28px" align="left">
                 <div style="font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#6E7787">Readiness score</div>
-                <div style="font-size:48px;font-weight:800;letter-spacing:-0.02em;line-height:1;margin:6px 0 4px 0;color:#0E1A2B">${score}<span style="font-size:22px;color:#6E7787;font-weight:600"> / 100</span></div>
+                <div class="score-big" style="font-size:48px;font-weight:800;letter-spacing:-0.02em;line-height:1;margin:6px 0 4px 0;color:#0E1A2B">${score}<span style="font-size:22px;color:#6E7787;font-weight:600"> / 100</span></div>
                 <div style="display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.1em;background:${bandColor};color:#FFFFFF">${escapeHtml(band)}</div>
               </td>
             </tr>
           </table>
         </td></tr>
 
-        <tr><td style="padding:8px 32px 24px 32px">
+        <tr><td class="email-pad" style="padding:8px 32px 24px 32px">
           <div style="font-size:13px;font-weight:600;color:#231F20;margin:0 0 8px 0">Score by domain</div>
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%">${domainRowsHtml}</table>
         </td></tr>
 
         ${focusAreas.length ? `
-        <tr><td style="padding:0 32px 24px 32px">
+        <tr><td class="email-pad" style="padding:0 32px 24px 32px">
           <div style="font-size:13px;font-weight:600;color:#231F20;margin:0 0 12px 0">Top 3 focus areas</div>
           <ol style="margin:0;padding-left:20px">${focusListHtml}</ol>
         </td></tr>` : ''}
 
-        <tr><td style="padding:0 32px 28px 32px">
+        <tr><td class="email-pad" style="padding:0 32px 28px 32px">
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#0E1A2B;border-radius:10px">
             <tr><td style="padding:24px 28px" align="center">
               <div style="color:#FFFFFF;font-size:16px;font-weight:700;margin-bottom:6px">Want a personalised walk-through?</div>
@@ -364,11 +382,11 @@ function sendQuizResultsToUser(data) {
           </table>
         </td></tr>
 
-        <tr><td style="padding:0 32px 24px 32px">
+        <tr><td class="email-pad" style="padding:0 32px 24px 32px">
           <p style="font-size:12px;color:#6E7787;line-height:1.55;margin:0">This is a self-assessment indicator only. It does not constitute an audit, certification or regulatory assessment. Reply to this email if you'd like to chat through your results.</p>
         </td></tr>
 
-        <tr><td style="padding:18px 32px 28px 32px;border-top:1px solid #DDE0E7">
+        <tr><td class="email-pad" style="padding:18px 32px 28px 32px;border-top:1px solid #DDE0E7">
           <div style="font-size:12px;color:#6E7787">— The Cenaris team · <a href="https://cenaris.com.au" style="color:#4A9FCC;text-decoration:none">cenaris.com.au</a></div>
         </td></tr>
 
@@ -473,35 +491,56 @@ function sendRoiReportToUser(data) {
 
   const html = `
 <!DOCTYPE html>
-<html><body style="margin:0;padding:0;background:#F5F6F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#231F20">
-  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#F5F6F8;padding:32px 12px">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Your Cenaris ROI Estimate</title>
+  <style>
+    body,table,td{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}
+    table,td{mso-table-lspace:0pt;mso-table-rspace:0pt}
+    @media only screen and (max-width:620px){
+      .email-outer{padding:0 !important}
+      .email-card{border-radius:0 !important;border-left:none !important;border-right:none !important}
+      .email-pad{padding-left:20px !important;padding-right:20px !important}
+      .email-h1{font-size:19px !important}
+      .savings-big{font-size:30px !important}
+      .stack-col{display:block !important;width:100% !important}
+      .stack-first{border-radius:8px 8px 0 0 !important;border-right:none !important}
+      .stack-last{border-radius:0 0 8px 8px !important}
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#F5F6F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#231F20">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" class="email-outer" style="background:#F5F6F8;padding:32px 12px">
     <tr><td align="center">
-      <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width:600px;background:#FFFFFF;border-radius:12px;overflow:hidden;border:1px solid #DDE0E7">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" class="email-card" style="max-width:600px;background:#FFFFFF;border-radius:12px;overflow:hidden;border:1px solid #DDE0E7">
 
-        <tr><td style="padding:28px 32px 0 32px">
+        <tr><td class="email-pad" style="padding:28px 32px 0 32px">
           <div style="font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#4A9FCC">Cenaris · Compliance ROI Estimate</div>
-          <h1 style="font-size:22px;font-weight:700;line-height:1.3;margin:14px 0 6px 0;color:#231F20">Your estimated annual savings</h1>
+          <h1 class="email-h1" style="font-size:22px;font-weight:700;line-height:1.3;margin:14px 0 6px 0;color:#231F20">Your estimated annual savings</h1>
           <p style="margin:0;color:#6E7787;font-size:14px;line-height:1.55">Based on the inputs you entered in the Cenaris compliance ROI calculator.</p>
         </td></tr>
 
-        <tr><td style="padding:24px 32px">
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:linear-gradient(135deg,#ECFDF5,#FFFFFF);border:1.5px solid #16A34A;border-radius:10px">
+        <tr><td class="email-pad" style="padding:24px 32px">
+          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#ECFDF5;background:linear-gradient(135deg,#ECFDF5,#FFFFFF);border:1.5px solid #16A34A;border-radius:10px">
             <tr><td style="padding:24px 28px" align="left">
               <div style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#16A34A">Estimated annual savings</div>
-              <div style="font-size:44px;font-weight:800;letter-spacing:-0.02em;line-height:1;margin:8px 0 4px 0;color:#16A34A">${fmtAUD(savings)}</div>
+              <div class="savings-big" style="font-size:44px;font-weight:800;letter-spacing:-0.02em;line-height:1;margin:8px 0 4px 0;color:#16A34A">${fmtAUD(savings)}</div>
               <div style="font-size:13px;color:#16A34A;font-weight:600">${escapeHtml(savingsPct)}% reduction · payback in ${escapeHtml(payback)} months</div>
             </td></tr>
           </table>
         </td></tr>
 
-        <tr><td style="padding:0 32px 24px 32px">
+        <tr><td class="email-pad" style="padding:0 32px 24px 32px">
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse">
             <tr>
-              <td width="50%" style="padding:14px 16px;background:#F5F6F8;border-radius:8px 0 0 8px;border-right:2px solid #FFFFFF" align="left">
+              <td width="50%" class="stack-col stack-first" style="padding:14px 16px;background:#F5F6F8;border-radius:8px 0 0 8px;border-right:2px solid #FFFFFF" align="left">
                 <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#6E7787">Current annual cost</div>
                 <div style="font-size:22px;font-weight:800;color:#0E1A2B;margin-top:4px">${fmtAUD(currentCost)}</div>
               </td>
-              <td width="50%" style="padding:14px 16px;background:#0E1A2B;border-radius:0 8px 8px 0" align="left">
+              <td width="50%" class="stack-col stack-last" style="padding:14px 16px;background:#0E1A2B;border-radius:0 8px 8px 0" align="left">
                 <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.65)">With Cenaris</div>
                 <div style="font-size:22px;font-weight:800;color:#FFFFFF;margin-top:4px">${fmtAUD(cenarisCost)}</div>
                 <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:2px">${escapeHtml(planName)} · $${escapeHtml(planMonth)}/mo</div>
@@ -510,12 +549,12 @@ function sendRoiReportToUser(data) {
           </table>
         </td></tr>
 
-        <tr><td style="padding:0 32px 24px 32px">
+        <tr><td class="email-pad" style="padding:0 32px 24px 32px">
           <div style="font-size:13px;font-weight:600;color:#231F20;margin:0 0 10px 0">Your inputs</div>
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%">${inputsHtml}</table>
         </td></tr>
 
-        <tr><td style="padding:0 32px 28px 32px">
+        <tr><td class="email-pad" style="padding:0 32px 28px 32px">
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#0E1A2B;border-radius:10px">
             <tr><td style="padding:24px 28px" align="center">
               <div style="color:#FFFFFF;font-size:16px;font-weight:700;margin-bottom:6px">${intent === 'book_call' ? 'Your call request is in.' : intent === 'join_waitlist' ? 'You\'re on the waitlist track.' : 'Want to talk it through?'}</div>
@@ -525,11 +564,11 @@ function sendRoiReportToUser(data) {
           </table>
         </td></tr>
 
-        <tr><td style="padding:0 32px 24px 32px">
+        <tr><td class="email-pad" style="padding:0 32px 24px 32px">
           <p style="font-size:12px;color:#6E7787;line-height:1.55;margin:0">These figures are estimates only based on the inputs you provided and industry-blended ratios for NDIS providers. Not a quote. Reply to this email if you'd like to walk through the model.</p>
         </td></tr>
 
-        <tr><td style="padding:18px 32px 28px 32px;border-top:1px solid #DDE0E7">
+        <tr><td class="email-pad" style="padding:18px 32px 28px 32px;border-top:1px solid #DDE0E7">
           <div style="font-size:12px;color:#6E7787">— The Cenaris team · <a href="https://cenaris.com.au" style="color:#4A9FCC;text-decoration:none">cenaris.com.au</a></div>
         </td></tr>
 
