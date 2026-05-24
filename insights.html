@@ -209,10 +209,14 @@
         <h2 style="margin-top:12px">Compliance, monthly.</h2>
         <p class="lede" style="margin-top:14px">One email a month. Practical, written by Adam, no fluff. Unsubscribe in one click.</p>
       </div>
-      <form onsubmit="event.preventDefault();this.querySelector('button').textContent='Subscribed &#10003;';this.querySelector('button').disabled=true;" style="display:flex;gap:10px;flex-wrap:wrap">
-        <input class="input" type="email" required placeholder="you@org.com" style="flex:1;min-width:240px;background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#fff"/>
-        <button class="btn btn-accent btn-lg" type="submit">Subscribe</button>
-      </form>
+      <div>
+        <form data-cenaris-form="newsletter" style="display:flex;gap:10px;flex-wrap:wrap">
+          <input class="input" type="email" name="email" required placeholder="you@org.com" style="flex:1;min-width:240px;background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#fff"/>
+          <button class="btn btn-accent btn-lg" type="submit">Subscribe</button>
+          <div data-form-error style="display:none;width:100%;font-size:14px;color:#fca5a5"></div>
+        </form>
+        <div data-form-success style="display:none;color:#fff;font-size:16px;font-weight:600">You're on the list. ✓</div>
+      </div>
     </div>
   </section>
 </main>
@@ -221,6 +225,7 @@
 <div id="cookie"></div>
 
 <script>window.CENARIS_PAGE = 'insights';</script>
+<script src="assets/forms.js"></script>
 <script src="assets/chrome.js"></script>
 <script>
   // Category filter + active-state for the Insights grid

@@ -90,6 +90,12 @@ const FORM_SCHEMAS = {
       ['Focus area 3',                'focus_3'],
     ],
   },
+  newsletter: {
+    label: 'newsletter signup',
+    columns: [
+      ['Email', 'email'],
+    ],
+  },
   roi: {
     label: 'ROI calculator lead',
     columns: [
