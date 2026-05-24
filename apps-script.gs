@@ -598,6 +598,10 @@ function testRun() {
       focus_3: 'Every staff member can locate the current policy that applies to their role.',
       focus_3_domain: 'Governance & operations',
     },
+    newsletter: {
+      form: 'newsletter',
+      email: testEmail,
+    },
     roi: {
       form: 'roi',
       email: testEmail,
