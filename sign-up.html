@@ -51,6 +51,10 @@
         </div>
         <div class="field"><label>What's your single biggest compliance pain right now? <span style="color:var(--gray-500);font-weight:400">(optional)</span></label><textarea class="textarea" name="painPoint" placeholder="e.g. evidence is everywhere; can't see gaps; consultants are expensive&hellip;"></textarea></div>
         <label class="checkbox" style="margin-bottom:24px"><input type="checkbox" name="partnerInterest" value="yes"/> Tell me about the partner program too</label>
+        <!-- Honeypot: invisible to humans; bots fill it and get silently dropped. -->
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+          <label>Company website (leave blank)<input type="text" name="company_website" tabindex="-1" autocomplete="off"/></label>
+        </div>
         <div data-form-error style="display:none;color:#DC2626;font-size:14px;margin-bottom:16px"></div>
         <button class="btn btn-primary btn-lg" type="submit" style="width:100%;justify-content:center">Join the waitlist <span class="arrow">&rarr;</span></button>
         <p style="font-size:12px;color:var(--gray-500);margin-top:16px;text-align:center">We will never sell, rent or share your details. Privacy Act 1988 &amp; APP compliant.</p>
