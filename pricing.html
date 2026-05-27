@@ -73,17 +73,16 @@
           </ul>
         </div>
 
-        <!-- TIER 2 ASSURANCE - highlighted -->
-        <div class="tier-card tier-card--featured">
-          <span class="tier-badge">Most popular</span>
-          <div class="tier-eyebrow tier-eyebrow--on-dark">Tier 2</div>
-          <h3 class="tier-name tier-name--on-dark">Assurance</h3>
-          <p class="tier-sub tier-sub--on-dark">Workflows, reminders and registers that keep the whole team on top of it.</p>
-          <div class="tier-price tier-price--on-dark"><span class="tier-price-currency">$</span><span class="tier-price-num">349</span><span class="tier-price-unit">/mo</span></div>
-          <div class="tier-price-sub tier-price-sub--on-dark">Billed annually</div>
-          <a href="sign-up.html" class="btn tier-cta tier-cta--on-dark">Join the waitlist</a>
-          <ul class="tier-features tier-features--on-dark">
-            <li class="tier-inherit tier-inherit--on-dark">Everything in Essentials, plus</li>
+        <!-- TIER 2 ASSURANCE -->
+        <div class="tier-card">
+          <div class="tier-eyebrow">Tier 2</div>
+          <h3 class="tier-name">Assurance</h3>
+          <p class="tier-sub">Workflows, reminders and registers that keep the whole team on top of it.</p>
+          <div class="tier-price"><span class="tier-price-currency">$</span><span class="tier-price-num">349</span><span class="tier-price-unit">/mo</span></div>
+          <div class="tier-price-sub">Billed annually</div>
+          <a href="sign-up.html" class="btn btn-secondary tier-cta">Join the waitlist</a>
+          <ul class="tier-features">
+            <li class="tier-inherit">Everything in Essentials, plus</li>
             <li>Exportable audit packs</li>
             <li>Deadline &amp; reminder system</li>
             <li>Task workflows &amp; reminders</li>
@@ -127,8 +126,7 @@
           <div class="tier-eyebrow">Enterprise</div>
           <h3 class="tier-name">Enterprise</h3>
           <p class="tier-sub">For multi-site networks and aged-care groups with custom integration needs.</p>
-          <div class="tier-price"><span class="tier-price-currency">$</span><span class="tier-price-num">1,499</span><span class="tier-price-unit">/mo</span></div>
-          <div class="tier-price-sub">Starting from. Talk to us for details.</div>
+          <div style="min-height:62px"></div>
           <a href="contact.html" class="btn btn-secondary tier-cta">Talk to sales</a>
           <ul class="tier-features">
             <li class="tier-inherit">Everything in Confidence, plus</li>
@@ -163,26 +161,6 @@
         flex-direction: column;
         box-shadow: var(--shadow-card);
       }
-      .tier-card--featured {
-        background: var(--gray-900);
-        color: #E5EBF3;
-        border-color: var(--gray-900);
-        box-shadow: 0 18px 40px rgba(14,26,43,0.18), 0 4px 12px rgba(14,26,43,0.08);
-      }
-      .tier-badge {
-        position: absolute;
-        top: -12px; left: 50%;
-        transform: translateX(-50%);
-        background: var(--blue-400);
-        color: #fff;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        padding: 6px 12px;
-        border-radius: var(--radius-full);
-        white-space: nowrap;
-      }
       .tier-eyebrow {
         font-size: 11px;
         font-weight: 700;
@@ -190,7 +168,6 @@
         text-transform: uppercase;
         color: var(--gray-500);
       }
-      .tier-eyebrow--on-dark { color: var(--blue-200); }
       .tier-name {
         font-size: 22px;
         font-weight: 700;
@@ -198,7 +175,6 @@
         margin: 6px 0 8px;
         letter-spacing: -0.01em;
       }
-      .tier-name--on-dark { color: #fff; }
       .tier-sub {
         font-size: 13px;
         color: var(--gray-600);
@@ -206,7 +182,6 @@
         margin: 0 0 22px;
         min-height: 56px;
       }
-      .tier-sub--on-dark { color: rgba(229,235,243,0.78); }
       .tier-price {
         display: flex;
         align-items: baseline;
@@ -214,28 +189,19 @@
         color: var(--gray-900);
         line-height: 1;
       }
-      .tier-price--on-dark { color: #fff; }
       .tier-price-currency { font-size: 20px; font-weight: 600; margin-right: 2px; }
       .tier-price-num { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; }
       .tier-price-unit { font-size: 14px; font-weight: 500; color: var(--gray-500); margin-left: 4px; }
-      .tier-price--on-dark .tier-price-unit { color: rgba(229,235,243,0.65); }
       .tier-price-sub {
         font-size: 12px;
         color: var(--gray-500);
         margin-top: 6px;
       }
-      .tier-price-sub--on-dark { color: rgba(229,235,243,0.6); }
       .tier-cta {
         width: 100%;
         justify-content: center;
         margin: 22px 0 0;
       }
-      .tier-cta--on-dark {
-        background: #fff;
-        color: var(--gray-900);
-        border-color: #fff;
-      }
-      .tier-cta--on-dark:hover { background: var(--gray-100); border-color: var(--gray-100); }
       .tier-features {
         list-style: none;
         padding: 22px 0 0;
@@ -247,7 +213,6 @@
         color: var(--gray-700);
         line-height: 1.45;
       }
-      .tier-features--on-dark { border-top-color: rgba(255,255,255,0.12); color: rgba(229,235,243,0.92); }
       .tier-features li {
         position: relative;
         padding-left: 22px;
@@ -263,25 +228,17 @@
         background-repeat: no-repeat;
         background-position: center;
       }
-      .tier-features--on-dark li::before {
-        background-color: rgba(255,255,255,0.10);
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%239FCDE9' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='3.5,7.2 6,9.5 10.5,4.8'/></svg>");
-      }
       .tier-inherit {
         font-weight: 600;
         color: var(--gray-900) !important;
         padding-left: 0 !important;
       }
       .tier-inherit::before { display: none !important; }
-      .tier-inherit--on-dark { color: #fff !important; }
-
       @media (max-width: 1180px) {
         .tier-grid { grid-template-columns: repeat(3, 1fr); }
-        .tier-card--featured { order: -1; grid-column: span 3; }
       }
       @media (max-width: 760px) {
         .tier-grid { grid-template-columns: 1fr; }
-        .tier-card--featured { grid-column: auto; }
         .tier-sub { min-height: 0; }
       }
     </style>
