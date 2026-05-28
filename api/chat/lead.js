@@ -1,6 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 const { notifyAdmin } = require('../_shared/notify');
+const { handleCors } = require('../_shared/cors');
 
 function getClient() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -18,6 +19,7 @@ function escAttr(str) {
 }
 
 module.exports = async function handler(req, res) {
+  if (handleCors(req, res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { conversationId, name, email, phone, enquiryType, marketingOptIn, sessionId } = req.body || {};
@@ -81,5 +83,5 @@ module.exports = async function handler(req, res) {
     console.error('email notification error', emailErr);
   }
 
-  res.status(200).json({ ok: true, leadId: lead.id });
+  res.status(200).json({ ok: true });
 };

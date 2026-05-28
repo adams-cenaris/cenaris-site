@@ -44,8 +44,7 @@ async function login() {
       body: JSON.stringify({ password: pw }),
     });
     const data = await r.json();
-    if (data.token) {
-      localStorage.setItem('cenaris-admin-token', data.token);
+    if (data.ok) {
       window.location.href = '/admin/chat';
     } else {
       err.textContent = data.error || 'Incorrect password.';

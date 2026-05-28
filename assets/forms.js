@@ -32,7 +32,7 @@
   } catch (_) { /* sessionStorage can fail in private modes &mdash; ignore */ }
 
   function readTrackingContext() {
-    const ctx = { page: window.location.pathname, userAgent: navigator.userAgent };
+    const ctx = { page: window.location.pathname };
     UTM_KEYS.forEach(k => { ctx[k] = sessionStorage.getItem('cenaris-' + k) || ''; });
     ctx.referrer = sessionStorage.getItem('cenaris-referrer') || document.referrer || '';
     ctx.landing = sessionStorage.getItem('cenaris-landing') || '';

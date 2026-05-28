@@ -133,23 +133,18 @@
 </div>
 
 <script>
-const token = () => localStorage.getItem('cenaris-admin-token');
-
 function authHeaders() {
-  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() };
+  return { 'Content-Type': 'application/json' };
 }
 
 async function apiFetch(path, opts = {}) {
-  const r = await fetch(path, { ...opts, headers: authHeaders() });
-  if (r.status === 401) { localStorage.removeItem('cenaris-admin-token'); location.href = '/admin/login'; }
+  const r = await fetch(path, { ...opts, headers: { ...authHeaders(), ...(opts.headers || {}) } });
+  if (r.status === 401) { location.href = '/admin/login'; }
   return r.json();
 }
 
-// ── Auth guard ───────────────────────────────────────────
-if (!token()) { location.href = '/admin/login'; }
-
-document.getElementById('logout-btn').addEventListener('click', () => {
-  localStorage.removeItem('cenaris-admin-token');
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
   location.href = '/admin/login';
 });
 

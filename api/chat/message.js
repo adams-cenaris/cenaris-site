@@ -2,6 +2,8 @@ const { createClient } = require('@supabase/supabase-js');
 const OpenAI = require('openai');
 const { notifyAdmin, detectKeywordType } = require('../_shared/notify');
 const { verifyAdmin } = require('../_shared/auth');
+const { checkRateLimit } = require('../_shared/ratelimit');
+const { handleCors } = require('../_shared/cors');
 
 function getClient() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -51,10 +53,13 @@ async function getAIReply(userMessage, conversationId, supabase) {
 }
 
 module.exports = async function handler(req, res) {
+  if (handleCors(req, res)) return;
+
   const supabase = getClient();
 
   if (req.method === 'GET') {
-    const { conversationId, after, sessionId } = req.query;
+    const { conversationId, after } = req.query;
+    const sessionId = req.headers['x-session-id'] || null;
     if (!conversationId) return res.status(400).json({ error: 'conversationId required' });
 
     if (!verifyAdmin(req)) {
@@ -63,7 +68,7 @@ module.exports = async function handler(req, res) {
       if (!convCheck || convCheck.session_id !== sessionId) return res.status(403).json({ error: 'Forbidden' });
     }
 
-    let query = supabase.from('messages').select('id, sender_type, body, created_at').eq('conversation_id', conversationId).order('created_at', { ascending: true });
+    let query = supabase.from('messages').select('id, sender_type, body, created_at').eq('conversation_id', conversationId).order('created_at', { ascending: true }).limit(200);
     if (after) query = query.gt('created_at', after);
     const { data, error } = await query;
     if (error) return res.status(500).json({ error: 'Failed to fetch messages' });
@@ -71,8 +76,12 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
+    // 60 messages per IP per minute
+    if (await checkRateLimit(req, res, 'chat:message', 60, 60)) return;
+
     const { conversationId, body, sessionId } = req.body || {};
     if (!conversationId || !body?.trim()) return res.status(400).json({ error: 'conversationId and body required' });
+    if (body.length > 2000) return res.status(400).json({ error: 'Message too long' });
 
     const { data: conv, error: convErr } = await supabase.from('conversations').select('id, mode, status, session_id').eq('id', conversationId).maybeSingle();
     if (convErr || !conv) return res.status(404).json({ error: 'Conversation not found' });

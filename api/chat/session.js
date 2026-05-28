@@ -1,6 +1,8 @@
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 const { notifyAdmin } = require('../_shared/notify');
+const { checkRateLimit } = require('../_shared/ratelimit');
+const { handleCors } = require('../_shared/cors');
 
 function getClient() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -16,9 +18,25 @@ function isAvailableByHours() {
 }
 
 module.exports = async function handler(req, res) {
+  if (handleCors(req, res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // 10 session creations per IP per 10 minutes
+  if (await checkRateLimit(req, res, 'chat:session', 10, 600)) return;
+
   const { sourceUrl } = req.body || {};
+
+  // Only accept sourceUrl values from our own domain
+  let safeSourceUrl = null;
+  if (sourceUrl && typeof sourceUrl === 'string') {
+    try {
+      const u = new URL(sourceUrl);
+      if (u.hostname === 'cenaris.com.au' || u.hostname === 'www.cenaris.com.au') {
+        safeSourceUrl = (u.pathname + u.search).slice(0, 500);
+      }
+    } catch { /* invalid URL — discard */ }
+  }
+
   const supabase = getClient();
 
   let override = null;
@@ -31,8 +49,11 @@ module.exports = async function handler(req, res) {
   const mode = available ? 'live' : 'ai';
   const sessionId = crypto.randomUUID();
 
-  const { data, error } = await supabase.from('conversations').insert({ session_id: sessionId, mode, source_url: sourceUrl || null }).select('id, session_id, mode').single();
-  if (error) return res.status(500).json({ error: 'Failed to create session', detail: error.message });
+  const { data, error } = await supabase.from('conversations').insert({ session_id: sessionId, mode, source_url: safeSourceUrl }).select('id, session_id, mode').single();
+  if (error) {
+    console.error('[session] create error', error.message);
+    return res.status(500).json({ error: 'Failed to create session' });
+  }
 
   // Notify admin immediately when a live-mode session starts (admin must respond).
   // Fire-and-forget — notification failure must not delay the visitor's response.

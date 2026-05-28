@@ -65,10 +65,14 @@ module.exports = async function handler(req, res) {
     }));
 
     const { error } = await supabase.from('knowledge_chunks').insert(rows);
-    if (error) return res.status(500).json({ error: 'DB insert failed', detail: error.message });
+    if (error) {
+      console.error('[seed] DB insert error', error.message);
+      return res.status(500).json({ error: 'DB insert failed' });
+    }
 
     res.status(200).json({ ok: true, chunksCreated: rows.length });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[seed] error', err?.message);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -143,8 +143,10 @@
     return r.json();
   }
 
-  async function get(path) {
-    const r = await fetch(API + path);
+  async function get(path, sessionId) {
+    const headers = {};
+    if (sessionId) headers['X-Session-Id'] = sessionId;
+    const r = await fetch(API + path, { headers });
     return r.json();
   }
 
@@ -159,7 +161,7 @@
     setMode(data.mode);
 
     // Load initial greeting from server
-    const msgs = await get(`/api/chat/message?conversationId=${data.conversationId}&sessionId=${data.sessionId}`);
+    const msgs = await get(`/api/chat/message?conversationId=${data.conversationId}`, data.sessionId);
     showTyping(false);
     if (msgs.messages) {
       msgs.messages.forEach(renderMessage);
@@ -224,8 +226,8 @@
 
   async function pollMessages() {
     if (!state.conversationId) return;
-    const url = `/api/chat/message?conversationId=${state.conversationId}&sessionId=${state.sessionId}${state.lastMsgTime ? '&after=' + encodeURIComponent(state.lastMsgTime) : ''}`;
-    const data = await get(url).catch(() => null);
+    const url = `/api/chat/message?conversationId=${state.conversationId}${state.lastMsgTime ? '&after=' + encodeURIComponent(state.lastMsgTime) : ''}`;
+    const data = await get(url, state.sessionId).catch(() => null);
     if (!data?.messages) return;
 
     let gotNew = false;
