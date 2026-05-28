@@ -1,4 +1,4 @@
-const { SignJWT } = require('jose');
+const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 // POST /api/admin/auth
@@ -19,17 +19,10 @@ module.exports = async function handler(req, res) {
   const equal = a.length === b.length && crypto.timingSafeEqual(a, b);
 
   if (!equal) {
-    // Small delay to slow brute-force even further
     await new Promise(r => setTimeout(r, 300));
     return res.status(401).json({ error: 'Invalid password' });
   }
 
-  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-  const token = await new SignJWT({ role: 'admin' })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('8h')
-    .sign(secret);
-
+  const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '8h' });
   res.status(200).json({ token });
 };

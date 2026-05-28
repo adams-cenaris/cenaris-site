@@ -23,24 +23,23 @@ function isWithinBusinessHours() {
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const supabase = getClient();
+  let available = isWithinBusinessHours();
 
-  // Check for active manual override
-  const { data: override } = await supabase
-    .from('availability_overrides')
-    .select('status')
-    .gt('expires_at', new Date().toISOString())
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  try {
+    const supabase = getClient();
+    const { data: override } = await supabase
+      .from('availability_overrides')
+      .select('status')
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  let available;
-  if (override) {
-    available = override.status === 'available';
-  } else {
-    available = isWithinBusinessHours();
+    if (override) available = override.status === 'available';
+  } catch (err) {
+    // Supabase unavailable — fall back to business hours logic
+    console.error('availability override check failed', err.message);
   }
 
-  const mode = available ? 'live' : 'ai';
-  res.status(200).json({ available, mode });
+  res.status(200).json({ available, mode: available ? 'live' : 'ai' });
 };
