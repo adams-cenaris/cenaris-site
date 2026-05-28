@@ -1,6 +1,6 @@
 {
   "private": true,
-  "engines": { "node": "20.x" },
+  "engines": { "node": "22.x" },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.0",
     "jsonwebtoken": "^9.0.2",
