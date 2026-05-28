@@ -36,28 +36,39 @@ function chunkText(text) {
 }
 
 module.exports = async function handler(req, res) {
-  if (!verifyAdmin(req)) return res.status(401).json({ error: 'Unauthorised' });
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  try {
+    if (!verifyAdmin(req)) return res.status(401).json({ error: 'Unauthorised' });
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { title, sourceUrl, content } = req.body || {};
-  if (!title?.trim() || !content?.trim()) return res.status(400).json({ error: 'title and content are required' });
+    const { title, sourceUrl, content } = req.body || {};
+    if (!title?.trim() || !content?.trim()) return res.status(400).json({ error: 'title and content are required' });
 
-  const supabase = getClient();
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const supabase = getClient();
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const chunks = chunkText(content.trim());
-  if (!chunks.length) return res.status(400).json({ error: 'No content to index' });
+    const chunks = chunkText(content.trim());
+    if (!chunks.length) return res.status(400).json({ error: 'No content to index' });
 
-  if (sourceUrl) await supabase.from('knowledge_chunks').delete().eq('source_url', sourceUrl);
+    if (sourceUrl) await supabase.from('knowledge_chunks').delete().eq('source_url', sourceUrl);
 
-  const rows = [];
-  for (const chunk of chunks) {
-    const embeddingRes = await openai.embeddings.create({ model: 'text-embedding-3-small', input: chunk });
-    rows.push({ title: title.trim(), source_url: sourceUrl || null, chunk_text: chunk, embedding: embeddingRes.data[0].embedding });
+    // Batch all embeddings in a single API call — much faster than sequential
+    const embeddingRes = await openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: chunks,
+    });
+
+    const rows = chunks.map((chunk, i) => ({
+      title: title.trim(),
+      source_url: sourceUrl || null,
+      chunk_text: chunk,
+      embedding: embeddingRes.data[i].embedding,
+    }));
+
+    const { error } = await supabase.from('knowledge_chunks').insert(rows);
+    if (error) return res.status(500).json({ error: 'DB insert failed', detail: error.message });
+
+    res.status(200).json({ ok: true, chunksCreated: rows.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-
-  const { error } = await supabase.from('knowledge_chunks').insert(rows);
-  if (error) return res.status(500).json({ error: 'Failed to store knowledge chunks' });
-
-  res.status(200).json({ ok: true, chunksCreated: rows.length });
 };
