@@ -192,21 +192,33 @@
 
     if (state.mode === 'ai') showTyping(true);
 
-    const data = await post('/api/chat/message', { conversationId: state.conversationId, body: text });
-    showTyping(false);
-    $('cw-send').disabled = false;
+    try {
+      const data = await post('/api/chat/message', { conversationId: state.conversationId, body: text });
+      showTyping(false);
+      $('cw-send').disabled = false;
 
-    // Replace temp message with server-confirmed ones
-    const existing = document.querySelector(`[data-id="${tempId}"]`);
-    if (existing) existing.remove();
+      // Replace temp message with server-confirmed ones
+      const existing = document.querySelector(`[data-id="${tempId}"]`);
+      if (existing) existing.remove();
 
-    if (data.messages) {
-      data.messages.forEach(msg => {
-        if (!document.querySelector(`[data-id="${msg.id}"]`)) renderMessage(msg);
-      });
-      if (data.messages.length > 0) {
-        state.lastMsgTime = data.messages[data.messages.length - 1].created_at;
+      if (data.messages) {
+        data.messages.forEach(msg => {
+          if (!document.querySelector(`[data-id="${msg.id}"]`)) renderMessage(msg);
+        });
+        if (data.messages.length > 0) {
+          state.lastMsgTime = data.messages[data.messages.length - 1].created_at;
+        }
       }
+    } catch (_err) {
+      showTyping(false);
+      $('cw-send').disabled = false;
+      const existing = document.querySelector(`[data-id="${tempId}"]`);
+      if (existing) existing.remove();
+      const errDiv = document.createElement('div');
+      errDiv.className = 'cw-msg system';
+      errDiv.textContent = 'Message failed to send. Please try again.';
+      $('cw-messages').insertBefore(errDiv, $('cw-typing'));
+      scrollBottom();
     }
   }
 

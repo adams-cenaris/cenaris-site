@@ -54,8 +54,8 @@ module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
     const { conversationId, after } = req.query;
     if (!conversationId) return res.status(400).json({ error: 'conversationId required' });
-    const query = supabase.from('messages').select('id, sender_type, body, created_at').eq('conversation_id', conversationId).order('created_at', { ascending: true });
-    if (after) query.gt('created_at', after);
+    let query = supabase.from('messages').select('id, sender_type, body, created_at').eq('conversation_id', conversationId).order('created_at', { ascending: true });
+    if (after) query = query.gt('created_at', after);
     const { data, error } = await query;
     if (error) return res.status(500).json({ error: 'Failed to fetch messages' });
     return res.status(200).json({ messages: data || [] });

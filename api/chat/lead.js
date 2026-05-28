@@ -8,6 +8,14 @@ function getClient() {
 const CONSENT_TEXT_VERSION = 'v1-2026-05';
 const PRIVACY_NOTICE = 'We will use your name, email, and phone to respond to your enquiry. We will not use them for marketing unless you opt in. See our Privacy Policy at cenaris.com.au/privacy-policy-tcs';
 
+function escHtml(str) {
+  return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escAttr(str) {
+  return String(str ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -50,7 +58,7 @@ module.exports = async function handler(req, res) {
         from: 'Cenaris Chat <noreply@cenaris.com.au>',
         to: ['info@cenaris.com.au'],
         subject: `New chat enquiry — ${name.trim()}`,
-        html: `<h2>New chat enquiry</h2><table cellpadding="6"><tr><td><strong>Name</strong></td><td>${name.trim()}</td></tr><tr><td><strong>Email</strong></td><td>${email.trim()}</td></tr>${phone ? `<tr><td><strong>Phone</strong></td><td>${phone.trim()}</td></tr>` : ''}<tr><td><strong>Enquiry type</strong></td><td>${enquiryType || 'General'}</td></tr>${firstMsg ? `<tr><td><strong>First message</strong></td><td>${firstMsg.body}</td></tr>` : ''}<tr><td><strong>Marketing opt-in</strong></td><td>${marketingOptIn ? 'Yes' : 'No'}</td></tr></table>${conversationId ? `<p><a href="https://cenaris.com.au/admin/chat?c=${conversationId}">View in admin console</a></p>` : ''}<p style="color:#888;font-size:12px">${PRIVACY_NOTICE}</p>`,
+        html: `<h2>New chat enquiry</h2><table cellpadding="6"><tr><td><strong>Name</strong></td><td>${escHtml(name.trim())}</td></tr><tr><td><strong>Email</strong></td><td>${escHtml(email.trim())}</td></tr>${phone ? `<tr><td><strong>Phone</strong></td><td>${escHtml(phone.trim())}</td></tr>` : ''}<tr><td><strong>Enquiry type</strong></td><td>${escHtml(enquiryType || 'General')}</td></tr>${firstMsg ? `<tr><td><strong>First message</strong></td><td>${escHtml(firstMsg.body)}</td></tr>` : ''}<tr><td><strong>Marketing opt-in</strong></td><td>${marketingOptIn ? 'Yes' : 'No'}</td></tr></table>${conversationId ? `<p><a href="https://cenaris.com.au/admin/chat?c=${escAttr(conversationId)}">View in admin console</a></p>` : ''}<p style="color:#888;font-size:12px">${escHtml(PRIVACY_NOTICE)}</p>`,
       }),
     });
   } catch (emailErr) {

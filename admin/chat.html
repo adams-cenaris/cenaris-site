@@ -192,15 +192,15 @@ async function refreshConversations() {
     return;
   }
   list.innerHTML = conversations.map(c => `
-    <div class="conv-item ${c.id === activeConvId ? 'active' : ''}" data-id="${c.id}">
+    <div class="conv-item ${c.id === activeConvId ? 'active' : ''}" data-id="${escAttr(c.id)}">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <div class="conv-name">${c.lead?.name || 'Visitor'}</div>
-        <span class="conv-mode ${c.mode}">${c.mode.toUpperCase()}</span>
+        <div class="conv-name">${escHtml(c.lead?.name || 'Visitor')}</div>
+        <span class="conv-mode ${escAttr(c.mode)}">${escHtml(c.mode.toUpperCase())}</span>
       </div>
-      <div class="conv-preview">${c.lastMessage?.body?.slice(0, 60) || '—'}</div>
+      <div class="conv-preview">${escHtml((c.lastMessage?.body || '—').slice(0, 60))}</div>
       <div class="conv-meta">
         <span class="conv-time">${relativeTime(c.createdAt)}</span>
-        ${c.unread > 0 ? `<span class="conv-badge">${c.unread}</span>` : ''}
+        ${c.unread > 0 ? `<span class="conv-badge">${Number(c.unread)}</span>` : ''}
       </div>
     </div>
   `).join('');
@@ -267,7 +267,11 @@ function appendMessage(msg) {
 }
 
 function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escAttr(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ── Send reply ────────────────────────────────────────────
@@ -309,9 +313,13 @@ document.getElementById('close-conv-btn').addEventListener('click', async () => 
       body: 'This conversation has been closed by the team. Thank you for contacting Cenaris.',
     }),
   });
-  // Closing is handled by refreshing — conversation will drop from list once status is updated
-  // For MVP: just reload the sidebar
+  await apiFetch('/api/admin/close', {
+    method: 'POST',
+    body: JSON.stringify({ conversationId: activeConvId }),
+  });
+  clearInterval(pollTimer);
   activeConvId = null;
+  lastMsgTime  = null;
   document.getElementById('chat-empty').style.display = '';
   document.getElementById('chat-conv').style.display = 'none';
   refreshConversations();

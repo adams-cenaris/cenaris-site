@@ -89,10 +89,14 @@
   (function () {
     const articles = window.CENARIS_ARTICLES || {};
     const params = new URLSearchParams(window.location.search);
-    let slug = params.get('slug') || 'audit-scramble';
-    if (!articles[slug]) slug = 'audit-scramble';
+    let slug = params.get('slug');
+    if (!slug || !articles[slug]) {
+      const firstSlug = Object.keys(articles)[0];
+      if (firstSlug) { window.location.replace('insights-article.html?slug=' + firstSlug); }
+      else { window.location.replace('insights.html'); }
+      return;
+    }
     const art = articles[slug];
-    if (!art) return;
 
     // Title + meta
     document.title = art.title.replace(/[".]/g, '').slice(0, 70) + ' | Cenaris Insights';

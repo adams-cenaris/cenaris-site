@@ -6,12 +6,12 @@
   const page = window.CENARIS_PAGE || '';
 
   const navLinks = [
-    { href: 'index.html',                 key: 'home',     label: 'Home' },
-    { href: 'about.html',                 key: 'about',    label: 'About' },
-    { href: 'insights.html',              key: 'insights', label: 'Insights' },
-    { href: 'pricing.html',               key: 'pricing',  label: 'Pricing' },
-    { href: 'partner-with-us.html',        key: 'partner',  label: 'Partner' },
-    { href: 'https://cenaris.com.au/contact', key: 'contact',  label: 'Contact' },
+    { href: '/',                  key: 'home',     label: 'Home' },
+    { href: '/about',             key: 'about',    label: 'About' },
+    { href: '/insights',          key: 'insights', label: 'Insights' },
+    { href: '/pricing',           key: 'pricing',  label: 'Pricing' },
+    { href: '/partner-with-us',   key: 'partner',  label: 'Partner' },
+    { href: '/contact',           key: 'contact',  label: 'Contact' },
   ];
 
   // -- Pre-launch bar --------------------------
@@ -22,7 +22,7 @@
         <div class="container">
           <span>Cenaris launches 1 July 2026 &mdash;</span>
           <span class="countdown-mini" data-mini-cd></span>
-          <a href="sign-up.html">Join the waitlist &rarr;</a>
+          <a href="/sign-up">Join the waitlist &rarr;</a>
           <button class="dismiss" aria-label="Dismiss announcement" data-dismiss-prelaunch>&times;</button>
         </div>
       </div>`;
@@ -45,8 +45,8 @@
             ${navLinks.map(l => `<a href="${l.href}" class="${page===l.key?'active':''}">${l.label}</a>`).join('')}
           </nav>
           <div class="nav-cta">
-            <a href="contact.html" class="btn btn-ghost btn-sm btn-cta-secondary">Book a demo</a>
-            <a href="sign-up.html" class="btn btn-primary btn-sm">Join the waitlist</a>
+            <a href="/contact" class="btn btn-ghost btn-sm btn-cta-secondary">Book a demo</a>
+            <a href="/sign-up" class="btn btn-primary btn-sm">Join the waitlist</a>
             <button class="nav-burger" aria-label="Open menu" aria-expanded="false" id="burger">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
             </button>
@@ -55,8 +55,8 @@
       </div>
       <div class="mobile-drawer" id="drawer">
         ${navLinks.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
-        <a href="contact.html">Book a demo</a>
-        <a href="sign-up.html" class="btn btn-primary">Join the waitlist</a>
+        <a href="/contact">Book a demo</a>
+        <a href="/sign-up" class="btn btn-primary">Join the waitlist</a>
       </div>`;
     const wrap = document.getElementById('nav-wrap');
     window.addEventListener('scroll', () => {
@@ -108,25 +108,25 @@
             <div class="footer-col">
               <h4>Product</h4>
               <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="pricing.html">Pricing</a></li>
-                <li><a href="roi.html">ROI calculator</a></li>
-                <li><a href="audit-readiness-check.html">Audit readiness check</a></li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+                <li><a href="/roi">ROI calculator</a></li>
+                <li><a href="/audit-readiness-check">Audit readiness check</a></li>
               </ul>
             </div>
             <div class="footer-col">
               <h4>Company</h4>
               <ul>
-                <li><a href="about.html">About</a></li>
-                <li><a href="partner-with-us.html">Partner with us</a></li>
-                <li><a href="insights.html">Insights</a></li>
-                <li><a href="contact.html">Contact</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/partner-with-us">Partner with us</a></li>
+                <li><a href="/insights">Insights</a></li>
+                <li><a href="/contact">Contact</a></li>
               </ul>
             </div>
             <div class="footer-col">
               <h4>Legal</h4>
               <ul>
-                <li><a href="privacy-policy-tcs.html">Privacy & T&Cs</a></li>
+                <li><a href="/privacy-policy-tcs">Privacy & T&Cs</a></li>
                 <li><a href="mailto:info@cenaris.com.au">info@cenaris.com.au</a></li>
                 <li><a href="https://calendly.com/adam-cenaris" target="_blank" rel="noopener">Book a demo</a></li>
               </ul>
@@ -150,7 +150,7 @@
   if (cookieEl && !localStorage.getItem('cenaris-cookie')) {
     cookieEl.innerHTML = `
       <div class="cookie" role="dialog" aria-label="Cookie preferences">
-        <p>We use a small number of cookies to remember preferences and measure how the site is used. Read our <a href="privacy-policy-tcs.html">privacy policy</a>.</p>
+        <p>We use a small number of cookies to remember preferences and measure how the site is used. Read our <a href="/privacy-policy-tcs">privacy policy</a>.</p>
         <div class="row">
           <button class="btn btn-secondary btn-sm" data-cookie="decline">Decline</button>
           <button class="btn btn-primary btn-sm" data-cookie="accept">Accept</button>
