@@ -11,6 +11,7 @@
     { href: 'insights.html',              key: 'insights', label: 'Insights' },
     { href: 'pricing.html',               key: 'pricing',  label: 'Pricing' },
     { href: 'partner-with-us.html',        key: 'partner',  label: 'Partner' },
+    { href: 'https://cenaris.com.au/contact', key: 'contact',  label: 'Contact' },
   ];
 
   // -- Pre-launch bar --------------------------
