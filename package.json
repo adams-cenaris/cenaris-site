@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "engines": { "node": "20.x" },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.0",
+    "jose": "^5.9.6",
+    "openai": "^4.67.0"
+  }
+}

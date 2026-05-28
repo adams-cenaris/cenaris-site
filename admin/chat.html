@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chat console — Cenaris</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="/assets/favicon-icon.png" />
+<link rel="stylesheet" href="/assets/site.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; background: var(--neutral-50, #f8fafc); font-family: -apple-system, "Open Sauce One", "Segoe UI", system-ui, sans-serif; }
+
+  /* Top bar */
+  .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 20px; height: 52px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+  .topbar img { height: 24px; }
+  .topbar h1 { font-size: 15px; font-weight: 600; color: #1a2b3c; margin: 0; flex: 1; }
+  .topbar-avail { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .avail-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+  .avail-dot.on  { background: #22c55e; }
+  .avail-dot.off { background: #f59e0b; }
+  .btn-sm-outline { padding: 5px 12px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #475569; transition: border-color .15s, color .15s; }
+  .btn-sm-outline:hover { border-color: #4A9FCC; color: #4A9FCC; }
+  .btn-logout { font-size: 12px; color: #94a3b8; background: none; border: none; cursor: pointer; padding: 4px 8px; }
+  .btn-logout:hover { color: #475569; }
+
+  /* Layout */
+  .console { display: flex; flex: 1; min-height: 0; }
+
+  /* Sidebar */
+  .sidebar { width: 280px; border-right: 1px solid #e2e8f0; background: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-header { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+  .sidebar-header h2 { font-size: 13px; font-weight: 600; margin: 0; color: #475569; text-transform: uppercase; letter-spacing: .04em; }
+  .sidebar-list { flex: 1; overflow-y: auto; }
+  .conv-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background .12s; }
+  .conv-item:hover { background: #f8fafc; }
+  .conv-item.active { background: #eff6ff; border-left: 3px solid #4A9FCC; }
+  .conv-name { font-weight: 600; font-size: 13.5px; color: #1a2b3c; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-preview { font-size: 12px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+  .conv-time { font-size: 11px; color: #cbd5e1; }
+  .conv-badge { background: #4A9FCC; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
+  .conv-mode { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; padding: 1px 5px; border-radius: 4px; }
+  .conv-mode.live { background: #dcfce7; color: #166534; }
+  .conv-mode.ai   { background: #e0f2fe; color: #0369a1; }
+  .empty-state { padding: 40px 20px; text-align: center; color: #94a3b8; font-size: 13px; }
+
+  /* Chat area */
+  .chat-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .chat-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 14px; }
+
+  .chat-conv-header { padding: 12px 20px; border-bottom: 1px solid #e2e8f0; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .chat-conv-info h3 { margin: 0; font-size: 14px; }
+  .chat-conv-info p  { margin: 2px 0 0; font-size: 12px; color: #64748b; }
+
+  .chat-messages { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; }
+  .msg { max-width: 75%; padding: 9px 13px; border-radius: 14px; font-size: 13.5px; line-height: 1.45; word-wrap: break-word; }
+  .msg.visitor { align-self: flex-end; background: #4A9FCC; color: #fff; border-bottom-right-radius: 4px; }
+  .msg.agent   { align-self: flex-start; background: #fff; color: #1a2b3c; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
+  .msg.ai      { align-self: flex-start; background: #eff6ff; color: #1a2b3c; border-bottom-left-radius: 4px; }
+  .msg.system  { align-self: center; background: #f1f5f9; color: #64748b; font-size: 12px; border-radius: 8px; text-align: center; max-width: 90%; }
+  .msg-meta { font-size: 11px; opacity: .5; margin-top: 3px; }
+
+  .chat-input-area { padding: 12px 16px; border-top: 1px solid #e2e8f0; background: #fff; display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
+  .chat-input { flex: 1; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 14px; resize: none; font-family: inherit; outline: none; max-height: 120px; overflow-y: auto; transition: border-color .15s; }
+  .chat-input:focus { border-color: #4A9FCC; }
+  .chat-send { padding: 9px 18px; background: #4A9FCC; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s; flex-shrink: 0; font-family: inherit; }
+  .chat-send:hover { background: #3a8ab8; }
+  .chat-send:disabled { background: #cbd5e1; cursor: not-allowed; }
+  .close-conv-btn { padding: 5px 12px; border: 1px solid #fca5a5; color: #ef4444; background: #fff; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background .15s; }
+  .close-conv-btn:hover { background: #fef2f2; }
+
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <img src="/assets/logo-horizontal.png" alt="Cenaris" />
+  <h1>Chat console</h1>
+  <div class="topbar-avail">
+    <div class="avail-dot" id="avail-dot"></div>
+    <span id="avail-label">Checking…</span>
+    <button class="btn-sm-outline" id="avail-toggle">Go online</button>
+  </div>
+  <button class="btn-logout" id="logout-btn">Sign out</button>
+</div>
+
+<div class="console">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Open conversations</h2>
+    </div>
+    <div class="sidebar-list" id="sidebar-list">
+      <div class="empty-state">No active conversations</div>
+    </div>
+  </div>
+
+  <div class="chat-area" id="chat-area">
+    <div class="chat-empty" id="chat-empty">Select a conversation to view it</div>
+    <div id="chat-conv" style="display:none; flex-direction:column; flex:1; min-height:0;">
+      <div class="chat-conv-header">
+        <div class="chat-conv-info">
+          <h3 id="conv-name">Visitor</h3>
+          <p id="conv-detail"></p>
+        </div>
+        <button class="close-conv-btn" id="close-conv-btn">Close conversation</button>
+      </div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" id="chat-input" placeholder="Type a reply…" rows="1"></textarea>
+        <button class="chat-send" id="chat-send">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const token = () => localStorage.getItem('cenaris-admin-token');
+
+function authHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() };
+}
+
+async function apiFetch(path, opts = {}) {
+  const r = await fetch(path, { ...opts, headers: authHeaders() });
+  if (r.status === 401) { localStorage.removeItem('cenaris-admin-token'); location.href = '/admin/login'; }
+  return r.json();
+}
+
+// ── Auth guard ───────────────────────────────────────────
+if (!token()) { location.href = '/admin/login'; }
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  localStorage.removeItem('cenaris-admin-token');
+  location.href = '/admin/login';
+});
+
+// ── State ─────────────────────────────────────────────────
+let activeConvId = null;
+let lastMsgTime  = null;
+let pollTimer    = null;
+let convPollTimer = null;
+let isAvailable  = false;
+
+// ── Availability ──────────────────────────────────────────
+async function refreshAvailability() {
+  const data = await fetch('/api/availability').then(r => r.json()).catch(() => null);
+  if (!data) return;
+  isAvailable = data.available;
+  const dot   = document.getElementById('avail-dot');
+  const label = document.getElementById('avail-label');
+  const btn   = document.getElementById('avail-toggle');
+  dot.className   = 'avail-dot ' + (isAvailable ? 'on' : 'off');
+  label.textContent = isAvailable ? 'Online' : 'Offline';
+  btn.textContent   = isAvailable ? 'Go offline' : 'Go online';
+}
+refreshAvailability();
+
+document.getElementById('avail-toggle').addEventListener('click', async () => {
+  const status = isAvailable ? 'unavailable' : 'available';
+  await apiFetch('/api/admin/availability', {
+    method: 'POST',
+    body: JSON.stringify({ status, expiresMinutes: 480 }),
+  });
+  refreshAvailability();
+});
+
+// ── Conversations sidebar ─────────────────────────────────
+function relativeTime(iso) {
+  const diff = Date.now() - new Date(iso);
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm ago';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + 'h ago';
+  return Math.floor(h / 24) + 'd ago';
+}
+
+let conversations = [];
+
+async function refreshConversations() {
+  const data = await apiFetch('/api/admin/conversations');
+  conversations = data.conversations || [];
+
+  const list = document.getElementById('sidebar-list');
+  if (!conversations.length) {
+    list.innerHTML = '<div class="empty-state">No active conversations</div>';
+    return;
+  }
+  list.innerHTML = conversations.map(c => `
+    <div class="conv-item ${c.id === activeConvId ? 'active' : ''}" data-id="${c.id}">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div class="conv-name">${c.lead?.name || 'Visitor'}</div>
+        <span class="conv-mode ${c.mode}">${c.mode.toUpperCase()}</span>
+      </div>
+      <div class="conv-preview">${c.lastMessage?.body?.slice(0, 60) || '—'}</div>
+      <div class="conv-meta">
+        <span class="conv-time">${relativeTime(c.createdAt)}</span>
+        ${c.unread > 0 ? `<span class="conv-badge">${c.unread}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.conv-item').forEach(el => {
+    el.addEventListener('click', () => selectConversation(el.dataset.id));
+  });
+}
+
+refreshConversations();
+convPollTimer = setInterval(refreshConversations, 5000);
+
+// ── Select conversation ───────────────────────────────────
+async function selectConversation(convId) {
+  activeConvId = convId;
+  lastMsgTime  = null;
+  clearInterval(pollTimer);
+
+  const conv = conversations.find(c => c.id === convId);
+  document.getElementById('chat-empty').style.display = 'none';
+  const convEl = document.getElementById('chat-conv');
+  convEl.style.display = 'flex';
+
+  document.getElementById('conv-name').textContent   = conv?.lead?.name || 'Visitor';
+  document.getElementById('conv-detail').textContent =
+    [conv?.lead?.email, conv?.lead?.phone, conv?.sourceUrl].filter(Boolean).join(' · ');
+
+  document.getElementById('chat-messages').innerHTML = '';
+
+  // Load all messages
+  const data = await apiFetch(`/api/chat/message?conversationId=${convId}`);
+  (data.messages || []).forEach(appendMessage);
+  if (data.messages?.length) {
+    lastMsgTime = data.messages[data.messages.length - 1].created_at;
+  }
+
+  // Re-render sidebar to show active state
+  refreshConversations();
+
+  // Start polling
+  pollTimer = setInterval(pollMessages, 3000);
+}
+
+async function pollMessages() {
+  if (!activeConvId) return;
+  const url = `/api/chat/message?conversationId=${activeConvId}${lastMsgTime ? '&after=' + encodeURIComponent(lastMsgTime) : ''}`;
+  const data = await apiFetch(url);
+  (data.messages || []).forEach(msg => {
+    if (!document.querySelector(`[data-id="${msg.id}"]`)) appendMessage(msg);
+  });
+  if (data.messages?.length) {
+    lastMsgTime = data.messages[data.messages.length - 1].created_at;
+  }
+}
+
+function appendMessage(msg) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + msg.sender_type;
+  div.dataset.id = msg.id;
+  div.innerHTML = `${escHtml(msg.body)}<div class="msg-meta">${msg.sender_type} · ${relativeTime(msg.created_at)}</div>`;
+  document.getElementById('chat-messages').appendChild(div);
+  const el = document.getElementById('chat-messages');
+  el.scrollTop = el.scrollHeight;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Send reply ────────────────────────────────────────────
+async function sendReply() {
+  const input = document.getElementById('chat-input');
+  const body  = input.value.trim();
+  if (!body || !activeConvId) return;
+
+  const btn = document.getElementById('chat-send');
+  btn.disabled = true;
+  input.value  = '';
+
+  const data = await apiFetch('/api/admin/reply', {
+    method: 'POST',
+    body: JSON.stringify({ conversationId: activeConvId, body }),
+  });
+  if (data.message && !document.querySelector(`[data-id="${data.message.id}"]`)) {
+    appendMessage(data.message);
+  }
+  btn.disabled = false;
+}
+
+document.getElementById('chat-send').addEventListener('click', sendReply);
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); }
+});
+document.getElementById('chat-input').addEventListener('input', function () {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+// ── Close conversation ────────────────────────────────────
+document.getElementById('close-conv-btn').addEventListener('click', async () => {
+  if (!activeConvId || !confirm('Mark this conversation as closed?')) return;
+  await apiFetch('/api/admin/reply', {
+    method: 'POST',
+    body: JSON.stringify({
+      conversationId: activeConvId,
+      body: 'This conversation has been closed by the team. Thank you for contacting Cenaris.',
+    }),
+  });
+  // Closing is handled by refreshing — conversation will drop from list once status is updated
+  // For MVP: just reload the sidebar
+  activeConvId = null;
+  document.getElementById('chat-empty').style.display = '';
+  document.getElementById('chat-conv').style.display = 'none';
+  refreshConversations();
+});
+
+// Check URL param for pre-selected conversation
+const urlParams = new URLSearchParams(location.search);
+if (urlParams.get('c')) {
+  selectConversation(urlParams.get('c'));
+}
+</script>
+</body>
+</html>

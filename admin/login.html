@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin login — Cenaris</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="/assets/favicon-icon.png" />
+<link rel="stylesheet" href="/assets/site.css" />
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--neutral-50, #f8fafc); }
+  .login-card { width: 100%; max-width: 360px; background: #fff; border-radius: 16px; padding: 40px 36px; box-shadow: 0 4px 24px rgba(0,0,0,.08); }
+  .login-card img { height: 28px; display: block; margin: 0 auto 28px; }
+  .login-card h1 { font-size: 20px; text-align: center; margin: 0 0 24px; color: var(--neutral-900, #0e1a2b); }
+  .login-card label { font-size: 13px; font-weight: 600; color: var(--neutral-600, #475569); display: block; margin-bottom: 6px; }
+  .login-card input[type=password] { width: 100%; padding: 10px 12px; border: 1px solid var(--neutral-200, #e2e8f0); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; }
+  .login-card input[type=password]:focus { border-color: var(--blue-400, #4A9FCC); box-shadow: 0 0 0 3px rgba(74,159,204,.15); }
+  .login-card .btn { margin-top: 16px; width: 100%; }
+  .login-error { color: #dc2626; font-size: 13px; margin-top: 10px; text-align: center; min-height: 18px; }
+</style>
+</head>
+<body>
+<div class="login-card">
+  <img src="/assets/logo-horizontal.png" alt="Cenaris" />
+  <h1>Admin login</h1>
+  <label for="pw">Password</label>
+  <input type="password" id="pw" autocomplete="current-password" autofocus />
+  <button class="btn btn-primary" id="submit-btn" onclick="login()">Sign in</button>
+  <div class="login-error" id="err"></div>
+</div>
+<script>
+async function login() {
+  const btn = document.getElementById('submit-btn');
+  const err = document.getElementById('err');
+  const pw  = document.getElementById('pw').value;
+  err.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  try {
+    const r = await fetch('/api/admin/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    const data = await r.json();
+    if (data.token) {
+      localStorage.setItem('cenaris-admin-token', data.token);
+      window.location.href = '/admin/chat';
+    } else {
+      err.textContent = data.error || 'Incorrect password.';
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  } catch {
+    err.textContent = 'Network error. Please try again.';
+    btn.disabled = false;
+    btn.textContent = 'Sign in';
+  }
+}
+
+document.getElementById('pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+</script>
+</body>
+</html>

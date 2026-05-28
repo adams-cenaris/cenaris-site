@@ -193,4 +193,12 @@
     });
   }, { threshold: 0.12 });
   document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+
+  // Chat widget — skip on admin pages
+  if (!window.location.pathname.startsWith('/admin')) {
+    var s = document.createElement('script');
+    s.src = '/assets/chat-widget.js';
+    s.defer = true;
+    document.head.appendChild(s);
+  }
 })();
