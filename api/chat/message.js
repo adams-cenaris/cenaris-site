@@ -1,5 +1,9 @@
-const { getClient } = require('../_shared/supabase');
+const { createClient } = require('@supabase/supabase-js');
 const OpenAI = require('openai');
+
+function getClient() {
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+}
 
 const AI_SYSTEM_PROMPT = `You are the website assistant for Cenaris, an Australian NDIS compliance platform for disability support providers.
 
@@ -18,46 +22,22 @@ Rules you must follow:
 async function getAIReply(userMessage, conversationId, supabase) {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  // Generate embedding for semantic search
-  const embeddingRes = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: userMessage,
-  });
+  const embeddingRes = await openai.embeddings.create({ model: 'text-embedding-3-small', input: userMessage });
   const embedding = embeddingRes.data[0].embedding;
 
-  // Retrieve relevant knowledge chunks via pgvector
-  const { data: chunks } = await supabase.rpc('match_knowledge_chunks', {
-    query_embedding: embedding,
-    match_threshold: 0.5,
-    match_count: 4,
-  });
+  const { data: chunks } = await supabase.rpc('match_knowledge_chunks', { query_embedding: embedding, match_threshold: 0.5, match_count: 4 });
 
-  let context = '';
-  if (chunks && chunks.length > 0) {
-    context = chunks.map(c => `[${c.title}]\n${c.chunk_text}`).join('\n\n---\n\n');
-  }
+  const context = chunks?.length
+    ? chunks.map(c => `[${c.title}]\n${c.chunk_text}`).join('\n\n---\n\n')
+    : '';
 
-  // Build recent conversation history (last 10 messages)
-  const { data: history } = await supabase
-    .from('messages')
-    .select('sender_type, body')
-    .eq('conversation_id', conversationId)
-    .order('created_at', { ascending: false })
-    .limit(10);
-
-  const historyMessages = (history || []).reverse().map(m => ({
-    role: m.sender_type === 'visitor' ? 'user' : 'assistant',
-    content: m.body,
-  }));
-
-  const systemWithContext = context
-    ? `${AI_SYSTEM_PROMPT}\n\nWebsite content for reference:\n\n${context}`
-    : AI_SYSTEM_PROMPT;
+  const { data: history } = await supabase.from('messages').select('sender_type, body').eq('conversation_id', conversationId).order('created_at', { ascending: false }).limit(10);
+  const historyMessages = (history || []).reverse().map(m => ({ role: m.sender_type === 'visitor' ? 'user' : 'assistant', content: m.body }));
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
-      { role: 'system', content: systemWithContext },
+      { role: 'system', content: context ? `${AI_SYSTEM_PROMPT}\n\nWebsite content for reference:\n\n${context}` : AI_SYSTEM_PROMPT },
       ...historyMessages,
       { role: 'user', content: userMessage },
     ],
@@ -71,71 +51,38 @@ async function getAIReply(userMessage, conversationId, supabase) {
 module.exports = async function handler(req, res) {
   const supabase = getClient();
 
-  // GET — poll for new messages
   if (req.method === 'GET') {
     const { conversationId, after } = req.query;
     if (!conversationId) return res.status(400).json({ error: 'conversationId required' });
-
-    const query = supabase
-      .from('messages')
-      .select('id, sender_type, body, created_at')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true });
-
+    const query = supabase.from('messages').select('id, sender_type, body, created_at').eq('conversation_id', conversationId).order('created_at', { ascending: true });
     if (after) query.gt('created_at', after);
-
     const { data, error } = await query;
     if (error) return res.status(500).json({ error: 'Failed to fetch messages' });
     return res.status(200).json({ messages: data || [] });
   }
 
-  // POST — send a message
   if (req.method === 'POST') {
     const { conversationId, body } = req.body || {};
-    if (!conversationId || !body?.trim()) {
-      return res.status(400).json({ error: 'conversationId and body required' });
-    }
+    if (!conversationId || !body?.trim()) return res.status(400).json({ error: 'conversationId and body required' });
 
-    // Verify conversation exists and get its mode
-    const { data: conv, error: convErr } = await supabase
-      .from('conversations')
-      .select('id, mode, status')
-      .eq('id', conversationId)
-      .maybeSingle();
-
+    const { data: conv, error: convErr } = await supabase.from('conversations').select('id, mode, status').eq('id', conversationId).maybeSingle();
     if (convErr || !conv) return res.status(404).json({ error: 'Conversation not found' });
     if (conv.status === 'closed') return res.status(400).json({ error: 'Conversation is closed' });
 
-    // Store visitor message
-    const { data: visitorMsg, error: msgErr } = await supabase
-      .from('messages')
-      .insert({ conversation_id: conversationId, sender_type: 'visitor', body: body.trim() })
-      .select()
-      .single();
-
+    const { data: visitorMsg, error: msgErr } = await supabase.from('messages').insert({ conversation_id: conversationId, sender_type: 'visitor', body: body.trim() }).select().single();
     if (msgErr) return res.status(500).json({ error: 'Failed to store message' });
 
     const messages = [visitorMsg];
 
-    // In AI mode, generate and store reply immediately
     if (conv.mode === 'ai') {
       try {
         const aiReply = await getAIReply(body.trim(), conversationId, supabase);
-        const { data: aiMsg } = await supabase
-          .from('messages')
-          .insert({ conversation_id: conversationId, sender_type: 'ai', body: aiReply })
-          .select()
-          .single();
+        const { data: aiMsg } = await supabase.from('messages').insert({ conversation_id: conversationId, sender_type: 'ai', body: aiReply }).select().single();
         if (aiMsg) messages.push(aiMsg);
       } catch (err) {
         console.error('AI reply error', err);
-        // Fallback if AI fails
         const fallback = "I'm sorry, I'm having trouble responding right now. Please try again, or leave your details and our team will follow up.";
-        const { data: fallbackMsg } = await supabase
-          .from('messages')
-          .insert({ conversation_id: conversationId, sender_type: 'ai', body: fallback })
-          .select()
-          .single();
+        const { data: fallbackMsg } = await supabase.from('messages').insert({ conversation_id: conversationId, sender_type: 'ai', body: fallback }).select().single();
         if (fallbackMsg) messages.push(fallbackMsg);
       }
     }
