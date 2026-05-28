@@ -394,38 +394,69 @@ async function initPushNotifications() {
     }
 
     function applyState() {
-      const s = getState();
+      const s   = getState();
+      const np  = Notification.permission;             // 'default' | 'granted' | 'denied'
+      const oi  = OneSignal.User.PushSubscription.optedIn;
+      const sid = OneSignal.User.PushSubscription.id;
+      console.log('[notify] state=%s Notification.permission=%s optedIn=%s subscriptionId=%s', s, np, oi, sid);
+
       btn.disabled = false;
       if (s === 'enabled') {
         btn.textContent = 'Notifications on ✓';
         btn.style.color = '#22c55e';
         btn.style.borderColor = '#22c55e';
-        btn.title = 'Push notifications are active on this device';
+        btn.title = 'Push notifications are active on this device. Click Test to send one now.';
         testBtn.style.display = '';
       } else if (s === 'denied') {
         btn.textContent = 'Notifications blocked';
         btn.style.color = '#f59e0b';
         btn.style.borderColor = '#f59e0b';
-        btn.title = 'Your browser has blocked notifications for this site. ' +
-          'To fix: open browser Settings → Site permissions → Notifications → ' +
-          'find cenaris.com.au and set it to Allow, then reload this page.';
+        btn.title = 'Browser has blocked notifications for this site. ' +
+          'Fix: Chrome address bar → lock icon → Site settings → Notifications → Allow → reload page.';
         btn.disabled = true;
+        testBtn.style.display = 'none';
+      } else if (np === 'granted') {
+        // Browser granted permission but OneSignal subscription not registered yet.
+        btn.textContent = 'Finish enabling…';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+        btn.title = 'Browser permission is granted — click to complete the subscription';
         testBtn.style.display = 'none';
       } else {
         btn.textContent = 'Enable notifications';
         btn.style.color = '';
         btn.style.borderColor = '';
-        btn.title = 'Get a push notification on this device whenever a visitor starts a chat';
+        btn.title = 'Notification.permission=' + np + ' — click to request browser permission';
         testBtn.style.display = 'none';
       }
     }
     applyState();
 
     btn.addEventListener('click', async () => {
-      if (getState() !== 'disabled') return;
-      btn.textContent = 'Requesting permission…';
+      const s  = getState();
+      const np = Notification.permission;
+      if (s === 'enabled') return;
+      if (s === 'denied') return;
+
+      btn.textContent = 'Working…';
       btn.disabled    = true;
-      await OneSignal.Notifications.requestPermission();
+
+      if (np === 'granted') {
+        // Browser permission already exists — just register the OneSignal subscription.
+        console.log('[notify] permission already granted, calling optIn()');
+        await OneSignal.User.PushSubscription.optIn();
+      } else {
+        // Ask for browser permission (may show a dialog, or use Chrome quiet UI).
+        console.log('[notify] calling requestPermission(), Notification.permission=%s', np);
+        await OneSignal.Notifications.requestPermission();
+        // If browser granted, complete the subscription.
+        if (Notification.permission === 'granted') {
+          await OneSignal.User.PushSubscription.optIn();
+        }
+      }
+
+      // Small wait for OneSignal to register the subscription asynchronously.
+      await new Promise(r => setTimeout(r, 1000));
       applyState();
     });
 
