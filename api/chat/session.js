@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
+const { notifyAdmin } = require('../_shared/notify');
 
 function getClient() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -32,6 +33,13 @@ module.exports = async function handler(req, res) {
 
   const { data, error } = await supabase.from('conversations').insert({ session_id: sessionId, mode, source_url: sourceUrl || null }).select('id, session_id, mode').single();
   if (error) return res.status(500).json({ error: 'Failed to create session', detail: error.message });
+
+  // Notify admin immediately when a live-mode session starts (admin must respond).
+  // Fire-and-forget — notification failure must not delay the visitor's response.
+  if (mode === 'live') {
+    notifyAdmin({ type: 'new_chat', chatId: data.id }, supabase)
+      .catch(err => console.error('[session] notify error', err?.message));
+  }
 
   const greeting = available
     ? "Hi, welcome to Cenaris. You're chatting with our team. How can we help today?"

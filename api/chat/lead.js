@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
+const { notifyAdmin } = require('../_shared/notify');
 
 function getClient() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -48,6 +49,16 @@ module.exports = async function handler(req, res) {
   if (conversationId) {
     await supabase.from('messages').insert({ conversation_id: conversationId, sender_type: 'system', body: `Contact details captured: ${name.trim()} (${email.trim()})${phone ? `, ${phone.trim()}` : ''}. Our team will follow up soon.` });
   }
+
+  // Push notification — email is already sent below via Resend; push goes to
+  // any admin device that has enabled notifications from admin/chat.html.
+  notifyAdmin({
+    type: 'lead_captured',
+    chatId: conversationId || null,
+    leadName: name.trim(),
+    leadEmail: email.trim(),
+    leadPhone: phone?.trim() || null,
+  }, supabase).catch(err => console.error('[lead] notify error', err?.message));
 
   try {
     const { data: firstMsg } = await supabase.from('messages').select('body').eq('conversation_id', conversationId).eq('sender_type', 'visitor').order('created_at', { ascending: true }).limit(1).maybeSingle();

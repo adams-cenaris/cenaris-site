@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="/assets/favicon-icon.png" />
 <link rel="stylesheet" href="/assets/site.css" />
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -86,6 +87,7 @@
     <span id="avail-label">Checking…</span>
     <button class="btn-sm-outline" id="avail-toggle">Go online</button>
   </div>
+  <button class="btn-sm-outline" id="notif-btn" style="display:none" title="Enable push notifications for new chat activity">Enable notifications</button>
   <button class="btn-logout" id="logout-btn">Sign out</button>
 </div>
 
@@ -211,7 +213,7 @@ async function refreshConversations() {
 }
 
 refreshConversations();
-convPollTimer = setInterval(refreshConversations, 5000);
+convPollTimer = setInterval(() => refreshConversations(), 5000);
 
 // ── Select conversation ───────────────────────────────────
 async function selectConversation(convId) {
@@ -330,6 +332,67 @@ const urlParams = new URLSearchParams(location.search);
 if (urlParams.get('c')) {
   selectConversation(urlParams.get('c'));
 }
+
+// ── Page-title unread badge ───────────────────────────────
+// Tracks the previous unread total so we only update the title on change.
+let prevUnreadTotal = 0;
+const BASE_TITLE = document.title;
+
+function updateTitleBadge(convList) {
+  const total = convList.reduce((sum, c) => sum + (c.unread || 0), 0);
+  document.title = total > 0 ? `(${total}) ${BASE_TITLE}` : BASE_TITLE;
+  prevUnreadTotal = total;
+}
+
+// Patch refreshConversations to also update the title badge.
+const _origRefresh = refreshConversations;
+refreshConversations = async function () {
+  await _origRefresh();
+  updateTitleBadge(conversations);
+};
+
+// ── OneSignal push notification subscription ─────────────
+// Shown only when ONESIGNAL_APP_ID is configured server-side.
+// Only admins visit this page, so all subscribers are admin devices.
+async function initPushNotifications() {
+  if (!('Notification' in window)) return; // browser doesn't support push
+
+  let appId;
+  try {
+    const cfg = await fetch('/api/config').then(r => r.json());
+    appId = cfg?.oneSignalAppId;
+  } catch { return; }
+  if (!appId) return; // OneSignal not configured — hide the button
+
+  const btn = document.getElementById('notif-btn');
+  btn.style.display = '';
+
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function (OneSignal) {
+    await OneSignal.init({
+      appId,
+      serviceWorkerPath: '/OneSignalSDKWorker.js',
+      serviceWorkerParam: { scope: '/' },
+      notifyButton: { enable: false }, // we use our own button
+    });
+
+    function updateBtn() {
+      const on = OneSignal.Notifications.permission && OneSignal.User.PushSubscription.optedIn;
+      btn.textContent = on ? 'Notifications on' : 'Enable notifications';
+      btn.style.color = on ? '#22c55e' : '';
+      btn.title = on
+        ? 'Push notifications are enabled on this device'
+        : 'Click to enable push notifications for new chat activity';
+    }
+    updateBtn();
+
+    btn.addEventListener('click', async () => {
+      await OneSignal.Notifications.requestPermission();
+      updateBtn();
+    });
+  });
+}
+initPushNotifications();
 </script>
 </body>
 </html>

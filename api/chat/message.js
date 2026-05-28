@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const OpenAI = require('openai');
+const { notifyAdmin, detectKeywordType } = require('../_shared/notify');
 
 function getClient() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -74,6 +75,21 @@ module.exports = async function handler(req, res) {
 
     const messages = [visitorMsg];
 
+    // Notify admin of visitor messages. Fire-and-forget — notification failures
+    // must not affect the visitor-facing response.
+    if (conv.mode === 'live') {
+      // Admin is expected to reply; notify on every message (subject to cooldown).
+      notifyAdmin({ type: 'new_message', chatId: conversationId }, supabase)
+        .catch(err => console.error('[message] notify error', err?.message));
+    } else if (conv.mode === 'ai') {
+      // In AI mode only notify for high-value keyword matches.
+      const kwType = detectKeywordType(body.trim());
+      if (kwType) {
+        notifyAdmin({ type: kwType, chatId: conversationId }, supabase)
+          .catch(err => console.error('[message] notify error', err?.message));
+      }
+    }
+
     if (conv.mode === 'ai') {
       try {
         const aiReply = await getAIReply(body.trim(), conversationId, supabase);
@@ -81,6 +97,9 @@ module.exports = async function handler(req, res) {
         if (aiMsg) messages.push(aiMsg);
       } catch (err) {
         console.error('AI reply error', err);
+        // AI failed — notify admin to review this conversation.
+        notifyAdmin({ type: 'human_review', chatId: conversationId }, supabase)
+          .catch(e => console.error('[message] notify error', e?.message));
         const fallback = "I'm sorry, I'm having trouble responding right now. Please try again, or leave your details and our team will follow up.";
         const { data: fallbackMsg } = await supabase.from('messages').insert({ conversation_id: conversationId, sender_type: 'ai', body: fallback }).select().single();
         if (fallbackMsg) messages.push(fallbackMsg);
