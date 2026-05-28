@@ -2,10 +2,18 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { checkRateLimit } = require('../_shared/ratelimit');
 
-// POST /api/admin/auth
-// Body: { password }
-// Sets an HttpOnly cookie on success — no token in the response body.
+const COOKIE_CLEAR = 'cenaris_admin=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0';
+const COOKIE_SET = (token) =>
+  `cenaris_admin=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`;
+
+// POST /api/admin/auth  — login (sets HttpOnly cookie)
+// DELETE /api/admin/auth — logout (clears cookie)
 module.exports = async function handler(req, res) {
+  if (req.method === 'DELETE') {
+    res.setHeader('Set-Cookie', COOKIE_CLEAR);
+    return res.status(200).json({ ok: true });
+  }
+
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // 5 login attempts per IP per 15 minutes
@@ -27,9 +35,6 @@ module.exports = async function handler(req, res) {
   }
 
   const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '8h' });
-  res.setHeader(
-    'Set-Cookie',
-    `cenaris_admin=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`,
-  );
+  res.setHeader('Set-Cookie', COOKIE_SET(token));
   res.status(200).json({ ok: true });
 };

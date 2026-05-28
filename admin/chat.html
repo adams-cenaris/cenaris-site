@@ -144,7 +144,7 @@ async function apiFetch(path, opts = {}) {
 }
 
 document.getElementById('logout-btn').addEventListener('click', async () => {
-  await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
+  await fetch('/api/admin/auth', { method: 'DELETE' }).catch(() => {});
   location.href = '/admin/login';
 });
 
