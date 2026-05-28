@@ -73,7 +73,15 @@
   .close-conv-btn:hover { background: #fef2f2; }
 
   @media (max-width: 640px) {
-    .sidebar { display: none; }
+    /* Sidebar goes full-width on mobile; chat area is hidden until a conv is tapped */
+    .sidebar { width: 100%; border-right: none; }
+    .mobile-back-btn { display: inline-block !important; }
+    /* Compact topbar: hide heading and availability text to save space */
+    .topbar h1 { display: none; }
+    #avail-label { display: none; }
+    .topbar { gap: 8px; padding: 0 10px; }
+    /* Notification area: hide test button on mobile to save topbar space */
+    #notif-test-btn { display: none !important; }
   }
 </style>
 </head>
@@ -108,11 +116,12 @@
     <div class="chat-empty" id="chat-empty">Select a conversation to view it</div>
     <div id="chat-conv" style="display:none; flex-direction:column; flex:1; min-height:0;">
       <div class="chat-conv-header">
-        <div class="chat-conv-info">
+        <button class="btn-sm-outline mobile-back-btn" id="mobile-back-btn" style="display:none;flex-shrink:0">← Back</button>
+        <div class="chat-conv-info" style="flex:1;min-width:0">
           <h3 id="conv-name">Visitor</h3>
           <p id="conv-detail"></p>
         </div>
-        <button class="close-conv-btn" id="close-conv-btn">Close conversation</button>
+        <button class="close-conv-btn" id="close-conv-btn">Close</button>
       </div>
       <div class="chat-messages" id="chat-messages"></div>
       <div class="chat-input-area">
@@ -142,6 +151,36 @@ if (!token()) { location.href = '/admin/login'; }
 document.getElementById('logout-btn').addEventListener('click', () => {
   localStorage.removeItem('cenaris-admin-token');
   location.href = '/admin/login';
+});
+
+// ── Mobile layout helpers ─────────────────────────────────
+const isMobile = () => window.innerWidth <= 640;
+
+function mobileShowList() {
+  if (!isMobile()) return;
+  document.querySelector('.sidebar').style.removeProperty('display');
+  document.getElementById('chat-area').style.display = 'none';
+}
+
+function mobileShowChat() {
+  if (!isMobile()) return;
+  document.querySelector('.sidebar').style.display = 'none';
+  document.getElementById('chat-area').style.removeProperty('display');
+}
+
+// On mobile, start with the conversation list visible and chat hidden.
+if (isMobile()) {
+  document.getElementById('chat-area').style.display = 'none';
+}
+
+document.getElementById('mobile-back-btn').addEventListener('click', () => {
+  clearInterval(pollTimer);
+  activeConvId = null;
+  lastMsgTime  = null;
+  document.getElementById('chat-empty').style.display = '';
+  document.getElementById('chat-conv').style.display  = 'none';
+  mobileShowList();
+  refreshConversations();
 });
 
 // ── State ─────────────────────────────────────────────────
@@ -223,6 +262,9 @@ async function selectConversation(convId) {
   activeConvId = convId;
   lastMsgTime  = null;
   clearInterval(pollTimer);
+
+  // On mobile, switch from the list view to the chat view.
+  mobileShowChat();
 
   const conv = conversations.find(c => c.id === convId);
   document.getElementById('chat-empty').style.display = 'none';
@@ -327,6 +369,7 @@ document.getElementById('close-conv-btn').addEventListener('click', async () => 
   lastMsgTime  = null;
   document.getElementById('chat-empty').style.display = '';
   document.getElementById('chat-conv').style.display = 'none';
+  mobileShowList();
   refreshConversations();
 });
 
