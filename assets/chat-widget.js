@@ -159,7 +159,7 @@
     setMode(data.mode);
 
     // Load initial greeting from server
-    const msgs = await get(`/api/chat/message?conversationId=${data.conversationId}`);
+    const msgs = await get(`/api/chat/message?conversationId=${data.conversationId}&sessionId=${data.sessionId}`);
     showTyping(false);
     if (msgs.messages) {
       msgs.messages.forEach(renderMessage);
@@ -193,7 +193,7 @@
     if (state.mode === 'ai') showTyping(true);
 
     try {
-      const data = await post('/api/chat/message', { conversationId: state.conversationId, body: text });
+      const data = await post('/api/chat/message', { conversationId: state.conversationId, sessionId: state.sessionId, body: text });
       showTyping(false);
       $('cw-send').disabled = false;
 
@@ -224,7 +224,7 @@
 
   async function pollMessages() {
     if (!state.conversationId) return;
-    const url = `/api/chat/message?conversationId=${state.conversationId}${state.lastMsgTime ? '&after=' + encodeURIComponent(state.lastMsgTime) : ''}`;
+    const url = `/api/chat/message?conversationId=${state.conversationId}&sessionId=${state.sessionId}${state.lastMsgTime ? '&after=' + encodeURIComponent(state.lastMsgTime) : ''}`;
     const data = await get(url).catch(() => null);
     if (!data?.messages) return;
 
@@ -274,12 +274,22 @@
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
-    const data = await post('/api/chat/lead', {
-      conversationId: state.conversationId,
-      name, email, phone,
-      enquiryType: 'general',
-      marketingOptIn: marketing,
-    });
+    let data;
+    try {
+      data = await post('/api/chat/lead', {
+        conversationId: state.conversationId,
+        sessionId: state.sessionId,
+        name, email, phone,
+        enquiryType: 'general',
+        marketingOptIn: marketing,
+      });
+    } catch (_err) {
+      btn.disabled = false;
+      btn.textContent = 'Send to our team';
+      errEl.textContent = 'Something went wrong. Please try again.';
+      errEl.className = 'cw-form-error visible';
+      return;
+    }
 
     if (data.ok) {
       state.leadCaptured = true;

@@ -9,6 +9,7 @@ function verifyAdmin(req) {
   const header = req.headers['authorization'] || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return null;
+  if (!process.env.JWT_SECRET) return null;
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     return payload.role === 'admin' ? payload : null;
@@ -22,8 +23,13 @@ module.exports = async function handler(req, res) {
   const { status, expiresMinutes = 480 } = req.body || {};
   if (!['available', 'unavailable'].includes(status)) return res.status(400).json({ error: "status must be 'available' or 'unavailable'" });
 
+  const mins = Number(expiresMinutes);
+  if (!Number.isFinite(mins) || mins < 1 || mins > 1440) {
+    return res.status(400).json({ error: 'expiresMinutes must be between 1 and 1440' });
+  }
+
   const supabase = getClient();
-  const expiresAt = new Date(Date.now() + expiresMinutes * 60 * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + mins * 60 * 1000).toISOString();
   const { error } = await supabase.from('availability_overrides').insert({ status, expires_at: expiresAt });
   if (error) return res.status(500).json({ error: 'Failed to set availability' });
 

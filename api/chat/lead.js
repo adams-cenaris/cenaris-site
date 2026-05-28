@@ -20,11 +20,16 @@ function escAttr(str) {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { conversationId, name, email, phone, enquiryType, marketingOptIn } = req.body || {};
+  const { conversationId, name, email, phone, enquiryType, marketingOptIn, sessionId } = req.body || {};
   if (!name?.trim() || !email?.trim()) return res.status(400).json({ error: 'name and email are required' });
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Invalid email address' });
 
   const supabase = getClient();
+
+  if (conversationId) {
+    const { data: convCheck } = await supabase.from('conversations').select('session_id').eq('id', conversationId).maybeSingle();
+    if (!convCheck || convCheck.session_id !== sessionId) return res.status(403).json({ error: 'Forbidden' });
+  }
 
   const { data: lead, error: leadErr } = await supabase.from('leads').insert({
     conversation_id: conversationId || null,

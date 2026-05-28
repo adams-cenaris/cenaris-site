@@ -9,6 +9,7 @@ function verifyAdmin(req) {
   const header = req.headers['authorization'] || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return null;
+  if (!process.env.JWT_SECRET) return null;
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     return payload.role === 'admin' ? payload : null;
@@ -26,7 +27,11 @@ module.exports = async function handler(req, res) {
 
   const enriched = (conversations || []).map(c => {
     const msgs = (c.messages || []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    return { id: c.id, mode: c.mode, status: c.status, sourceUrl: c.source_url, createdAt: c.created_at, lead: c.leads?.[0] || null, lastMessage: msgs[0] || null, unread: msgs.filter(m => m.sender_type === 'visitor').length };
+    const lastReply = msgs.find(m => m.sender_type !== 'visitor');
+    const unread = lastReply
+      ? msgs.filter(m => m.sender_type === 'visitor' && new Date(m.created_at) > new Date(lastReply.created_at)).length
+      : msgs.filter(m => m.sender_type === 'visitor').length;
+    return { id: c.id, mode: c.mode, status: c.status, sourceUrl: c.source_url, createdAt: c.created_at, lead: c.leads?.[0] || null, lastMessage: msgs[0] || null, unread };
   });
 
   res.status(200).json({ conversations: enriched });

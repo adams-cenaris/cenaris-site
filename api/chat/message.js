@@ -1,6 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const OpenAI = require('openai');
 const { notifyAdmin, detectKeywordType } = require('../_shared/notify');
+const { verifyAdmin } = require('../_shared/auth');
 
 function getClient() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -53,8 +54,15 @@ module.exports = async function handler(req, res) {
   const supabase = getClient();
 
   if (req.method === 'GET') {
-    const { conversationId, after } = req.query;
+    const { conversationId, after, sessionId } = req.query;
     if (!conversationId) return res.status(400).json({ error: 'conversationId required' });
+
+    if (!verifyAdmin(req)) {
+      if (!sessionId) return res.status(403).json({ error: 'Forbidden' });
+      const { data: convCheck } = await supabase.from('conversations').select('session_id').eq('id', conversationId).maybeSingle();
+      if (!convCheck || convCheck.session_id !== sessionId) return res.status(403).json({ error: 'Forbidden' });
+    }
+
     let query = supabase.from('messages').select('id, sender_type, body, created_at').eq('conversation_id', conversationId).order('created_at', { ascending: true });
     if (after) query = query.gt('created_at', after);
     const { data, error } = await query;
@@ -63,12 +71,13 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { conversationId, body } = req.body || {};
+    const { conversationId, body, sessionId } = req.body || {};
     if (!conversationId || !body?.trim()) return res.status(400).json({ error: 'conversationId and body required' });
 
-    const { data: conv, error: convErr } = await supabase.from('conversations').select('id, mode, status').eq('id', conversationId).maybeSingle();
+    const { data: conv, error: convErr } = await supabase.from('conversations').select('id, mode, status, session_id').eq('id', conversationId).maybeSingle();
     if (convErr || !conv) return res.status(404).json({ error: 'Conversation not found' });
     if (conv.status === 'closed') return res.status(400).json({ error: 'Conversation is closed' });
+    if (!sessionId || conv.session_id !== sessionId) return res.status(403).json({ error: 'Forbidden' });
 
     const { data: visitorMsg, error: msgErr } = await supabase.from('messages').insert({ conversation_id: conversationId, sender_type: 'visitor', body: body.trim() }).select().single();
     if (msgErr) return res.status(500).json({ error: 'Failed to store message' });

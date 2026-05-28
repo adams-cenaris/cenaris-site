@@ -23,6 +23,7 @@ module.exports = async function handler(req, res) {
     return res.status(401).json({ error: 'Invalid password' });
   }
 
+  if (!process.env.JWT_SECRET) return res.status(500).json({ error: 'Admin auth not configured' });
   const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '8h' });
   res.status(200).json({ token });
 };

@@ -74,6 +74,24 @@
       const submitBtn = form.querySelector('button[type=submit]');
       const errEl = form.querySelector('[data-form-error]');
       if (errEl) errEl.style.display = 'none';
+
+      // Validate required fields before disabling the button so it never gets stuck.
+      for (const field of form.querySelectorAll('[name][required]')) {
+        const empty = field.type === 'checkbox' ? !field.checked : !field.value.trim();
+        if (empty) {
+          const lbl = form.querySelector(`label[for="${field.id}"]`);
+          const name = lbl ? lbl.textContent.replace(/\s*[\(\*].*$/, '').trim() : 'required field';
+          if (errEl) { errEl.textContent = 'Please fill in: ' + name + '.'; errEl.style.display = 'block'; }
+          field.focus();
+          return;
+        }
+        if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value.trim())) {
+          if (errEl) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display = 'block'; }
+          field.focus();
+          return;
+        }
+      }
+
       if (submitBtn) { submitBtn.disabled = true; submitBtn.dataset._label = submitBtn.innerHTML; submitBtn.innerHTML = 'Submitting&hellip;'; }
 
       // Collect named fields.

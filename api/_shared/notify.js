@@ -221,9 +221,9 @@ async function notifyAdmin(params, supabase) {
   if (!pushCooldown) {
     ops.push(
       sendPush(title).then(result => {
-        // Log when we actually attempted (sent or failed), not when unconfigured.
-        // This prevents log entries blocking future sends once OneSignal is set up.
-        if (result !== 'not_configured') {
+        // Only log on success so a transient OneSignal failure doesn't activate
+        // the cooldown and suppress future alerts for this conversation.
+        if (result === 'sent') {
           return logNotification(supabase, chatId, type, 'push');
         }
       })
@@ -233,7 +233,7 @@ async function notifyAdmin(params, supabase) {
   if (EMAIL_TYPES.has(type) && !emailCooldown) {
     ops.push(
       sendEmail({ type, chatId, leadName, leadEmail, leadPhone }).then(result => {
-        if (result !== 'not_configured') {
+        if (result === 'sent') {
           return logNotification(supabase, chatId, type, 'email');
         }
       })
