@@ -79,7 +79,16 @@ Confidence plan: $349 per month, billed annually. Everything in Essentials, plus
 Enterprise plan: Custom pricing, contact the team to discuss. Everything in Confidence, plus unlimited frameworks, sites and users, executive dashboards and board reporting, API integrations and evidence automation, enterprise-grade permissions and single sign-on (SSO), cross-framework compliance mapping, regulatory monitoring and audit trails, dedicated onboarding, and priority support. Designed for multi-site networks and aged-care groups with custom integration needs.
 
 How do I get started with Cenaris?
-You can join the waitlist at cenaris.com.au or book a demo call directly with the team via the contact page. Cenaris is launching 1 July 2026 with limited early-bird spots available.`;
+You can join the waitlist at cenaris.com.au or book a demo call directly with the team via the contact page. Cenaris is launching 1 July 2026 with limited early-bird spots available.
+
+How do I book a demo or speak with the Cenaris team?
+Adam Stefano (Co-Founder and CEO) personally takes every intro call during the pre-launch period. You can book a free, no-obligation 20-minute call directly at calendly.com/adam-cenaris. There is no sales pressure — Adam uses these calls to understand your organisation's situation and explain how Cenaris could fit. Alternatively, you can send a message via the chat on the website and the team will follow up.
+
+How do I join the waitlist?
+You can sign up at cenaris.com.au/sign-up. The waitlist is free and takes about two minutes. Joining early secures founding-member pricing (locked in for as long as you subscribe), first access when the platform launches on 1 July 2026, and a personal onboarding session with Adam in the first 90 days after launch.
+
+What does it mean to be an early-bird or founding member?
+Founding members are organisations that join the waitlist before the 1 July 2026 launch. They receive: their chosen plan rate locked in for the lifetime of their subscription (protected from future price increases), first access to the platform ahead of general availability, and direct onboarding support from Adam Stefano personally during the first 90 days. Early-bird spots are limited.`;
 
 async function main() {
   if (!TOKEN) {

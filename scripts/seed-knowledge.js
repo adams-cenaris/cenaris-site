@@ -37,6 +37,8 @@ const PAGES = [
   { file: 'roi.html',            title: 'ROI Calculator — Cenaris',             url: '/roi' },
   { file: 'audit-readiness-check.html', title: 'Audit Readiness Check — Cenaris', url: '/audit-readiness-check' },
   { file: 'privacy-policy-tcs.html', title: 'Privacy Policy & T&Cs — Cenaris', url: '/privacy-policy-tcs' },
+  { file: 'sign-up.html',            title: 'Join the Cenaris Waitlist',         url: '/sign-up' },
+  { file: 'insights.html',           title: 'Cenaris Insights — Compliance Articles', url: '/insights' },
 ];
 
 function stripHtml(html) {

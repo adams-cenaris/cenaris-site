@@ -7,6 +7,20 @@
   const API = '';  // same-origin — no prefix needed
   const POLL_MS = 3000;
 
+  const KEYWORD_TYPES = [
+    { pattern: /book|demo|schedule|call/i,          type: 'demo_request' },
+    { pattern: /price|cost|quote|pricing|proposal/i, type: 'pricing_request' },
+    { pattern: /enterprise|partner|reseller/i,       type: 'enterprise' },
+    { pattern: /support|urgent|broken|error/i,       type: 'support_request' },
+  ];
+
+  function detectEnquiryType(text) {
+    for (const { pattern, type } of KEYWORD_TYPES) {
+      if (pattern.test(text)) return type;
+    }
+    return null;
+  }
+
   let state = {
     open: false,
     conversationId: null,
@@ -16,6 +30,7 @@
     pollTimer: null,
     leadCaptured: false,
     unread: 0,
+    enquiryType: 'general',
   };
 
   // ── Inject CSS ────────────────────────────────────────────────
@@ -115,6 +130,21 @@
     el.scrollTop = el.scrollHeight;
   }
 
+  function renderCalendlyCTA() {
+    const div = document.createElement('div');
+    div.className = 'cw-msg ai';
+    const text = document.createTextNode("Thanks — we'll be in touch soon! In the meantime, you're welcome to book a free 20-minute call with Adam directly: ");
+    const link = document.createElement('a');
+    link.href = 'https://calendly.com/adam-cenaris';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = 'calendly.com/adam-cenaris';
+    div.appendChild(text);
+    div.appendChild(link);
+    $('cw-messages').insertBefore(div, $('cw-typing'));
+    scrollBottom();
+  }
+
   function showTyping(on) {
     $('cw-typing').className = on ? 'cw-typing visible' : 'cw-typing';
   }
@@ -193,6 +223,9 @@
     scrollBottom();
 
     if (state.mode === 'ai') showTyping(true);
+
+    const detected = detectEnquiryType(text);
+    if (detected) state.enquiryType = detected;
 
     try {
       const data = await post('/api/chat/message', { conversationId: state.conversationId, sessionId: state.sessionId, body: text });
@@ -282,7 +315,7 @@
         conversationId: state.conversationId,
         sessionId: state.sessionId,
         name, email, phone,
-        enquiryType: 'general',
+        enquiryType: state.enquiryType,
         marketingOptIn: marketing,
       });
     } catch (_err) {
@@ -297,6 +330,7 @@
       state.leadCaptured = true;
       $('cw-lead-form').className = 'cw-lead-form';
       $('cw-escalate').style.display = 'none';
+      renderCalendlyCTA();
     } else {
       btn.disabled = false;
       btn.textContent = 'Send to our team';
