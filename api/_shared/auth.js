@@ -12,7 +12,10 @@ function parseCookies(header) {
 
 function verifyAdmin(req) {
   const cookies = parseCookies(req.headers['cookie']);
-  const token = cookies['cenaris_admin'] ?? null;
+  const cookieToken = cookies['cenaris_admin'] ?? null;
+  const authHeader = req.headers['authorization'] ?? '';
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const token = cookieToken ?? bearerToken;
   if (!token || !process.env.JWT_SECRET) return null;
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
