@@ -50,6 +50,7 @@ module.exports = requireAdmin(async function handler(req, res) {
   if (!appId || !apiKey) {
     return res.status(400).json({ ok: false, error: 'ONESIGNAL_APP_ID or ONESIGNAL_REST_API_KEY not set' });
   }
+  console.log('[test-notification] using appId=%s keyPrefix=%s', appId, apiKey.slice(0, 8));
 
   const supabase = getSupabase();
   let ids = [];
@@ -81,13 +82,13 @@ module.exports = requireAdmin(async function handler(req, res) {
       console.log('[test-notification] retrying with included_segments All');
       ({ ok, json } = await sendOneSignal(appId, apiKey, { included_segments: ['All'] }));
       if (ok) {
-        return res.json({ ok: true, recipients: json.recipients ?? 0, id: json.id, errors: json.errors, method: 'segment_all', storedIds: ids });
+        return res.json({ ok: true, recipients: json.recipients ?? 0, id: json.id, errors: json.errors, method: 'segment_all', storedIds: ids, appId });
       }
     }
     if (!ok) {
       return res.status(500).json({ ok: false, errors: json.errors, error: json });
     }
-    return res.json({ ok: true, recipients: json.recipients ?? 0, id: json.id, errors: json.errors, storedIds: ids });
+    return res.json({ ok: true, recipients: json.recipients ?? 0, id: json.id, errors: json.errors, storedIds: ids, appId });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err?.message });
   }
