@@ -20,20 +20,26 @@ const SITE_URL  = process.env.SITE_URL || 'http://localhost:3000';
 const SITE_ROOT = path.join(__dirname, '..');
 
 async function getToken() {
-  if (process.env.ADMIN_TOKEN) return process.env.ADMIN_TOKEN;
-  if (!process.env.ADMIN_PASSWORD) {
-    console.error('\nERROR: Set ADMIN_PASSWORD (or ADMIN_TOKEN) env var.\n');
-    console.error('  Run: SITE_URL=https://cenaris.com.au ADMIN_PASSWORD=yourpassword node scripts/seed-knowledge.js\n');
-    process.exit(1);
+  // Password takes priority — avoids stale ADMIN_TOKEN from previous sessions
+  if (process.env.ADMIN_PASSWORD) {
+    process.stdout.write('Authenticating… ');
+    const res  = await fetch(SITE_URL + '/api/admin/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: process.env.ADMIN_PASSWORD }),
+    });
+    const data = await res.json();
+    if (!data.token) {
+      console.error('\nAuth failed (HTTP ' + res.status + '):', JSON.stringify(data));
+      process.exit(1);
+    }
+    console.log('OK');
+    return data.token;
   }
-  const res  = await fetch(SITE_URL + '/api/admin/auth', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: process.env.ADMIN_PASSWORD }),
-  });
-  const data = await res.json();
-  if (!data.token) { console.error('Auth failed:', data); process.exit(1); }
-  return data.token;
+  if (process.env.ADMIN_TOKEN) return process.env.ADMIN_TOKEN;
+  console.error('\nERROR: Set ADMIN_PASSWORD env var.\n');
+  console.error('  Run: SITE_URL=https://cenaris.com.au ADMIN_PASSWORD=yourpassword node scripts/seed-knowledge.js\n');
+  process.exit(1);
 }
 
 // Pages to index — { file, title, url }
