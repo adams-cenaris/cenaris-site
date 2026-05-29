@@ -548,15 +548,20 @@ async function initPushNotifications() {
       testBtn.disabled    = true;
       try {
         const r = await apiFetch('/api/admin/test-notification', { method: 'POST' });
+        console.log('[notify] test result', r);
         if (r.recipients > 0) {
           testBtn.textContent = `Sent ✓ (${r.recipients})`;
+        } else if (r.error) {
+          const msg = r.error?.errors?.[0] || JSON.stringify(r.error);
+          testBtn.textContent = 'Error — check console';
+          console.error('[notify] OneSignal error:', msg, r);
         } else {
           testBtn.textContent = 'No subscribers — re-enable';
-          console.warn('[notify] test returned 0 recipients — subscription may be stale. Click "Notifications on ✓" to opt out, then re-enable.');
+          console.warn('[notify] 0 recipients. Sub ID:', OneSignal.User.PushSubscription.id);
         }
       } catch (err) {
         testBtn.textContent = 'Failed — check console';
-        console.error('[notify] test error', err);
+        console.error('[notify] test fetch error', err);
       }
       setTimeout(() => { testBtn.textContent = 'Test'; testBtn.disabled = false; }, 5000);
     });

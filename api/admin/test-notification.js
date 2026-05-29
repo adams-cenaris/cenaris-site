@@ -25,12 +25,11 @@ module.exports = requireAdmin(async function handler(req, res) {
       }),
     });
     const json = await r.json().catch(() => ({}));
+    console.log('[test-notification] status=%d body=%s', r.status, JSON.stringify(json));
     if (!r.ok) {
-      console.error('[test-notification] OneSignal error', JSON.stringify(json));
-      return res.status(500).json({ ok: false, error: json });
+      return res.status(500).json({ ok: false, httpStatus: r.status, error: json });
     }
-    console.log('[test-notification] sent id=%s recipients=%d', json.id, json.recipients);
-    return res.json({ ok: true, recipients: json.recipients ?? 0, id: json.id });
+    return res.json({ ok: true, recipients: json.recipients ?? 0, id: json.id, errors: json.errors });
   } catch (err) {
     console.error('[test-notification] fetch error', err?.message);
     return res.status(500).json({ ok: false, error: err?.message });
