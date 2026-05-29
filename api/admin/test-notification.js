@@ -14,7 +14,7 @@ module.exports = requireAdmin(async function handler(req, res) {
     const r = await fetch(`https://ntfy.sh/${topic}`, {
       method: 'POST',
       headers: {
-        'Title': 'Test — Cenaris notifications working',
+        'Title': 'Test - Cenaris notifications working',
         'Priority': 'high',
         'Click': 'https://cenaris.com.au/admin/chat',
         'Content-Type': 'text/plain',

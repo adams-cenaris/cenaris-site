@@ -99,7 +99,7 @@ async function sendPush(title) {
     const res = await fetch(`https://ntfy.sh/${topic}`, {
       method: 'POST',
       headers: {
-        'Title': title,
+        'Title': title.replace(/[^\x00-\x7F]/g, '-'),
         'Priority': 'high',
         'Click': 'https://cenaris.com.au/admin/chat',
         'Icon': 'https://cenaris.com.au/assets/favicon-icon.png',
