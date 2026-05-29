@@ -86,61 +86,35 @@ async function logNotification(supabase, conversationId, type, channel) {
 }
 
 /**
- * Send a push notification via OneSignal REST API.
+ * Send a push notification via ntfy.sh.
  * Returns 'sent', 'failed', or 'not_configured'.
- * Only 'sent' and 'failed' trigger a cooldown log entry — 'not_configured'
- * does not log so the cooldown resets once OneSignal is set up.
  */
-async function getSubscriptionIds(supabase) {
-  try {
-    const { data } = await supabase
-      .from('admin_push_subscriptions')
-      .select('subscription_id');
-    return (data || []).map(r => r.subscription_id);
-  } catch {
-    return [];
-  }
-}
-
-async function sendPush(title, supabase) {
-  const appId  = process.env.ONESIGNAL_APP_ID;
-  const apiKey = process.env.ONESIGNAL_REST_API_KEY;
-  if (!appId || !apiKey) {
-    console.log('[notify] push skipped — ONESIGNAL_APP_ID / ONESIGNAL_REST_API_KEY not set');
+async function sendPush(title) {
+  const topic = process.env.NTFY_TOPIC;
+  if (!topic) {
+    console.log('[notify] push skipped — NTFY_TOPIC not set');
     return 'not_configured';
   }
-
-  const ids = await getSubscriptionIds(supabase);
-  if (ids.length === 0) {
-    console.log('[notify] push skipped — no admin subscriptions registered');
-    return 'not_configured';
-  }
-
   try {
-    const res = await fetch('https://onesignal.com/api/v1/notifications', {
+    const res = await fetch(`https://ntfy.sh/${topic}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Basic ${apiKey}`,
+        'Title': title,
+        'Priority': 'high',
+        'Click': 'https://cenaris.com.au/admin/chat',
+        'Icon': 'https://cenaris.com.au/assets/favicon-icon.png',
+        'Content-Type': 'text/plain',
       },
-      body: JSON.stringify({
-        app_id: appId,
-        include_subscription_ids: ids,
-        headings: { en: title },
-        contents: { en: 'Tap to open the Cenaris admin console.' },
-        url: 'https://cenaris.com.au/admin/chat',
-        chrome_web_icon: 'https://cenaris.com.au/assets/favicon-icon.png',
-      }),
+      body: 'Tap to open the Cenaris admin console.',
     });
-    const json = await res.json().catch(() => ({}));
     if (!res.ok) {
-      console.error('[notify] OneSignal error', JSON.stringify(json));
+      console.error('[notify] ntfy error status=%d', res.status);
       return 'failed';
     }
-    console.log('[notify] push sent id=%s recipients=%d', json.id, json.recipients);
+    console.log('[notify] ntfy sent topic=%s title=%s', topic, title);
     return 'sent';
   } catch (err) {
-    console.error('[notify] push error', err?.message);
+    console.error('[notify] ntfy error', err?.message);
     return 'failed';
   }
 }
@@ -238,7 +212,7 @@ async function notifyAdmin(params, supabase) {
 
   if (!pushCooldown) {
     ops.push(
-      sendPush(title, supabase).then(result => {
+      sendPush(title).then(result => {
         // Only log on success so a transient OneSignal failure doesn't activate
         // the cooldown and suppress future alerts for this conversation.
         if (result === 'sent') {

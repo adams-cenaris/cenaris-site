@@ -13,7 +13,6 @@
 <meta name="apple-mobile-web-app-title" content="Cenaris" />
 <link rel="apple-touch-icon" href="/assets/favicon-icon.png" />
 <link rel="stylesheet" href="/assets/site.css" />
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -101,9 +100,8 @@
     <span id="avail-label">Checking…</span>
     <button class="btn-sm-outline" id="avail-toggle">Go online</button>
   </div>
-  <div id="notif-area" style="display:none;align-items:center;gap:6px">
-    <button class="btn-sm-outline" id="notif-btn" disabled>…</button>
-    <button class="btn-sm-outline" id="notif-test-btn" style="display:none;font-size:11px;padding:4px 9px" title="Send a test push to this device">Test</button>
+  <div id="notif-area" style="display:flex;align-items:center;gap:6px">
+    <button class="btn-sm-outline" id="notif-test-btn" style="font-size:11px;padding:4px 9px" title="Send a test push to your phone via ntfy">Test notify</button>
   </div>
   <button class="btn-logout" id="logout-btn">Sign out</button>
 </div>
@@ -439,171 +437,18 @@ refreshConversations = async function () {
   updateTitleBadge(conversations);
 };
 
-// ── OneSignal push notification subscription ─────────────
-async function initPushNotifications() {
-  const area = document.getElementById('notif-area');
-  const btn  = document.getElementById('notif-btn');
-
-  // iOS Safari doesn't support web push outside of a PWA (Add to Home Screen).
-  if (!('Notification' in window)) {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if (isIOS) {
-      area.style.display = 'flex';
-      btn.textContent = 'Install app for notifications';
-      btn.disabled = false;
-      btn.title = 'Open this page in Safari, tap Share → Add to Home Screen, then re-open from your home screen to enable push notifications.';
-      btn.addEventListener('click', () => alert('To get push notifications on iPhone:\n\n1. Open cenaris.com.au/admin/chat in Safari\n2. Tap the Share button (box with arrow)\n3. Tap "Add to Home Screen"\n4. Open the app from your home screen\n5. Tap "Enable notifications"'));
-    }
-    return;
-  }
-
-  let appId;
+// ── ntfy test button ──────────────────────────────────────
+document.getElementById('notif-test-btn').addEventListener('click', async function () {
+  this.textContent = 'Sending…';
+  this.disabled = true;
   try {
-    const cfg = await fetch('/api/config').then(r => r.json());
-    appId = cfg?.oneSignalAppId;
-  } catch { return; }
-  if (!appId) return;
-
-  const testBtn = document.getElementById('notif-test-btn');
-  area.style.display = 'flex';
-
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function (OneSignal) {
-    try {
-      await OneSignal.init({
-        appId,
-        serviceWorkerPath: '/OneSignalSDKWorker.js',
-        serviceWorkerParam: { scope: '/' },
-        notifyButton: { enable: false },
-      });
-    } catch (err) {
-      btn.textContent = 'Notifications unavailable';
-      btn.disabled = false;
-      console.error('[notify] OneSignal init failed', err);
-      return;
-    }
-
-    // Require a real subscription ID — optedIn alone can be stale after an app ID change.
-    function getState() {
-      if (Notification.permission === 'denied') return 'denied';
-      const sid = OneSignal.User.PushSubscription.id;
-      if (OneSignal.Notifications.permission && OneSignal.User.PushSubscription.optedIn && sid) return 'enabled';
-      return 'disabled';
-    }
-
-    function applyState() {
-      const s   = getState();
-      const np  = Notification.permission;
-      const oi  = OneSignal.User.PushSubscription.optedIn;
-      const sid = OneSignal.User.PushSubscription.id;
-      console.log('[notify] state=%s permission=%s optedIn=%s subscriptionId=%s', s, np, oi, sid);
-
-      btn.disabled = false;
-      if (s === 'enabled') {
-        btn.textContent = 'Notifications on ✓';
-        btn.style.color = '#22c55e';
-        btn.style.borderColor = '#22c55e';
-        btn.title = 'Notifications active — click to turn off';
-        testBtn.style.display = '';
-      } else if (s === 'denied') {
-        btn.textContent = 'Notifications blocked';
-        btn.style.color = '#f59e0b';
-        btn.style.borderColor = '#f59e0b';
-        btn.title = 'Browser has blocked notifications. Fix: address bar → lock icon → Site settings → Notifications → Allow → reload.';
-        btn.disabled = true;
-        testBtn.style.display = 'none';
-      } else if (np === 'granted') {
-        btn.textContent = 'Re-enable notifications';
-        btn.style.color = '';
-        btn.style.borderColor = '';
-        btn.title = 'Browser permission granted but not subscribed to OneSignal — click to re-register';
-        testBtn.style.display = 'none';
-      } else {
-        btn.textContent = 'Enable notifications';
-        btn.style.color = '';
-        btn.style.borderColor = '';
-        testBtn.style.display = 'none';
-      }
-    }
-    applyState();
-
-    btn.addEventListener('click', async () => {
-      const s  = getState();
-      const np = Notification.permission;
-      if (s === 'denied') return;
-
-      btn.disabled = true;
-
-      if (s === 'enabled') {
-        btn.textContent = 'Turning off…';
-        const oldId = OneSignal.User.PushSubscription.id;
-        await OneSignal.User.PushSubscription.optOut();
-        if (oldId) {
-          apiFetch('/api/admin/test-notification', { method: 'DELETE', body: JSON.stringify({ subscriptionId: oldId }) }).catch(() => {});
-        }
-        await new Promise(r => setTimeout(r, 500));
-        applyState();
-        return;
-      }
-
-      btn.textContent = 'Working…';
-
-      // Unregister any stale OneSignal service worker so the new subscription
-      // is created under the current App ID, not a previously cached one.
-      try {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(r => r.unregister()));
-        console.log('[notify] cleared', regs.length, 'service worker(s)');
-      } catch (e) {
-        console.warn('[notify] SW unregister failed', e);
-      }
-
-      if (np === 'granted') {
-        await OneSignal.User.PushSubscription.optIn();
-      } else {
-        await OneSignal.Notifications.requestPermission();
-        if (Notification.permission === 'granted') {
-          await OneSignal.User.PushSubscription.optIn();
-        }
-      }
-      // Wait for OneSignal to register, then save the new subscription ID
-      await new Promise(r => setTimeout(r, 2000));
-      const sid = OneSignal.User.PushSubscription.id;
-      console.log('[notify] new subscriptionId after re-register:', sid);
-      if (sid) {
-        apiFetch('/api/admin/test-notification', { method: 'POST', body: JSON.stringify({ subscriptionId: sid }) }).catch(() => {});
-      }
-      applyState();
-    });
-
-    testBtn.addEventListener('click', async () => {
-      testBtn.textContent = 'Sending…';
-      testBtn.disabled    = true;
-      try {
-        const r = await apiFetch('/api/admin/test-notification', { method: 'POST' });
-        console.log('[notify] test result', r);
-        console.log('[notify] test result', r);
-        if (r.recipients > 0) {
-          testBtn.textContent = `Sent ✓ (${r.recipients})`;
-        } else if (r.errors?.length) {
-          testBtn.textContent = 'Error — check console';
-          console.error('[notify] OneSignal errors:', r.errors);
-        } else if (r.reason === 'no_stored_ids_used_segment') {
-          testBtn.textContent = `Segment fallback: ${r.recipients ?? 0} recipients`;
-          console.warn('[notify] No stored IDs — used segment. Re-enable notifications to register.');
-        } else {
-          testBtn.textContent = `0 recipients — check console`;
-          console.warn('[notify] 0 recipients. Full result:', r);
-        }
-      } catch (err) {
-        testBtn.textContent = 'Failed — check console';
-        console.error('[notify] test fetch error', err);
-      }
-      setTimeout(() => { testBtn.textContent = 'Test'; testBtn.disabled = false; }, 5000);
-    });
-  });
-}
-initPushNotifications();
+    await apiFetch('/api/admin/test-notification', { method: 'POST' });
+    this.textContent = 'Sent ✓';
+  } catch {
+    this.textContent = 'Failed';
+  }
+  setTimeout(() => { this.textContent = 'Test notify'; this.disabled = false; }, 3000);
+});
 </script>
 </body>
 </html>
