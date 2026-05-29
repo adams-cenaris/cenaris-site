@@ -471,47 +471,45 @@ async function initPushNotifications() {
       return;
     }
 
-    // Derive the plain state from the browser + OneSignal APIs.
+    // Require a real subscription ID — optedIn alone can be stale after an app ID change.
     function getState() {
       if (Notification.permission === 'denied') return 'denied';
-      if (OneSignal.Notifications.permission && OneSignal.User.PushSubscription.optedIn) return 'enabled';
+      const sid = OneSignal.User.PushSubscription.id;
+      if (OneSignal.Notifications.permission && OneSignal.User.PushSubscription.optedIn && sid) return 'enabled';
       return 'disabled';
     }
 
     function applyState() {
       const s   = getState();
-      const np  = Notification.permission;             // 'default' | 'granted' | 'denied'
+      const np  = Notification.permission;
       const oi  = OneSignal.User.PushSubscription.optedIn;
       const sid = OneSignal.User.PushSubscription.id;
-      console.log('[notify] state=%s Notification.permission=%s optedIn=%s subscriptionId=%s', s, np, oi, sid);
+      console.log('[notify] state=%s permission=%s optedIn=%s subscriptionId=%s', s, np, oi, sid);
 
       btn.disabled = false;
       if (s === 'enabled') {
         btn.textContent = 'Notifications on ✓';
         btn.style.color = '#22c55e';
         btn.style.borderColor = '#22c55e';
-        btn.title = 'Push notifications are active on this device. Click Test to send one now.';
+        btn.title = 'Notifications active — click to turn off';
         testBtn.style.display = '';
       } else if (s === 'denied') {
         btn.textContent = 'Notifications blocked';
         btn.style.color = '#f59e0b';
         btn.style.borderColor = '#f59e0b';
-        btn.title = 'Browser has blocked notifications for this site. ' +
-          'Fix: Chrome address bar → lock icon → Site settings → Notifications → Allow → reload page.';
+        btn.title = 'Browser has blocked notifications. Fix: address bar → lock icon → Site settings → Notifications → Allow → reload.';
         btn.disabled = true;
         testBtn.style.display = 'none';
       } else if (np === 'granted') {
-        // Browser granted permission but OneSignal subscription not registered yet.
-        btn.textContent = 'Finish enabling…';
+        btn.textContent = 'Re-enable notifications';
         btn.style.color = '';
         btn.style.borderColor = '';
-        btn.title = 'Browser permission is granted — click to complete the subscription';
+        btn.title = 'Browser permission granted but not subscribed to OneSignal — click to re-register';
         testBtn.style.display = 'none';
       } else {
         btn.textContent = 'Enable notifications';
         btn.style.color = '';
         btn.style.borderColor = '';
-        btn.title = 'Notification.permission=' + np + ' — click to request browser permission';
         testBtn.style.display = 'none';
       }
     }
@@ -520,27 +518,27 @@ async function initPushNotifications() {
     btn.addEventListener('click', async () => {
       const s  = getState();
       const np = Notification.permission;
-      if (s === 'enabled') return;
       if (s === 'denied') return;
 
-      btn.textContent = 'Working…';
-      btn.disabled    = true;
+      btn.disabled = true;
 
+      if (s === 'enabled') {
+        btn.textContent = 'Turning off…';
+        await OneSignal.User.PushSubscription.optOut();
+        await new Promise(r => setTimeout(r, 500));
+        applyState();
+        return;
+      }
+
+      btn.textContent = 'Working…';
       if (np === 'granted') {
-        // Browser permission already exists — just register the OneSignal subscription.
-        console.log('[notify] permission already granted, calling optIn()');
         await OneSignal.User.PushSubscription.optIn();
       } else {
-        // Ask for browser permission (may show a dialog, or use Chrome quiet UI).
-        console.log('[notify] calling requestPermission(), Notification.permission=%s', np);
         await OneSignal.Notifications.requestPermission();
-        // If browser granted, complete the subscription.
         if (Notification.permission === 'granted') {
           await OneSignal.User.PushSubscription.optIn();
         }
       }
-
-      // Small wait for OneSignal to register the subscription asynchronously.
       await new Promise(r => setTimeout(r, 1000));
       applyState();
     });
@@ -550,11 +548,17 @@ async function initPushNotifications() {
       testBtn.disabled    = true;
       try {
         const r = await apiFetch('/api/admin/test-notification', { method: 'POST' });
-        testBtn.textContent = (r.recipients > 0) ? `Sent ✓ (${r.recipients})` : 'No subscribers yet';
-      } catch {
+        if (r.recipients > 0) {
+          testBtn.textContent = `Sent ✓ (${r.recipients})`;
+        } else {
+          testBtn.textContent = 'No subscribers — re-enable';
+          console.warn('[notify] test returned 0 recipients — subscription may be stale. Click "Notifications on ✓" to opt out, then re-enable.');
+        }
+      } catch (err) {
         testBtn.textContent = 'Failed — check console';
+        console.error('[notify] test error', err);
       }
-      setTimeout(() => { testBtn.textContent = 'Test'; testBtn.disabled = false; }, 4000);
+      setTimeout(() => { testBtn.textContent = 'Test'; testBtn.disabled = false; }, 5000);
     });
   });
 }
