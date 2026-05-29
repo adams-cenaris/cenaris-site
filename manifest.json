@@ -1,0 +1,17 @@
+{
+  "name": "Cenaris Admin",
+  "short_name": "Cenaris",
+  "description": "Cenaris admin console — chat and notifications",
+  "start_url": "/admin/chat",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#4A9FCC",
+  "icons": [
+    {
+      "src": "/assets/favicon-icon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

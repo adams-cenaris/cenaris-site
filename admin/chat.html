@@ -6,6 +6,12 @@
 <title>Chat console — Cenaris</title>
 <meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="/assets/favicon-icon.png" />
+<link rel="manifest" href="/manifest.json" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Cenaris" />
+<link rel="apple-touch-icon" href="/assets/favicon-icon.png" />
 <link rel="stylesheet" href="/assets/site.css" />
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
@@ -290,9 +296,14 @@ async function pollMessages() {
   if (!activeConvId) return;
   const url = `/api/chat/message?conversationId=${activeConvId}${lastMsgTime ? '&after=' + encodeURIComponent(lastMsgTime) : ''}`;
   const data = await apiFetch(url);
+  let hasVisitorMsg = false;
   (data.messages || []).forEach(msg => {
-    if (!document.querySelector(`[data-id="${msg.id}"]`)) appendMessage(msg);
+    if (!document.querySelector(`[data-id="${msg.id}"]`)) {
+      appendMessage(msg);
+      if (msg.sender_type === 'visitor') hasVisitorMsg = true;
+    }
   });
+  if (hasVisitorMsg) playNotificationSound();
   if (data.messages?.length) {
     lastMsgTime = data.messages[data.messages.length - 1].created_at;
   }
@@ -374,14 +385,45 @@ if (urlParams.get('c')) {
   selectConversation(urlParams.get('c'));
 }
 
+// ── In-page audio notification ────────────────────────────
+// Plays a soft two-tone chime via Web Audio API (no audio file needed).
+// Browsers require a user gesture before audio context creation; we
+// initialise lazily on first interaction.
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+document.addEventListener('click', () => getAudioCtx(), { once: true });
+
+function playNotificationSound() {
+  try {
+    const ctx  = getAudioCtx();
+    const gain = ctx.createGain();
+    gain.connect(ctx.destination);
+
+    [[880, 0, 0.12], [1100, 0.13, 0.12]].forEach(([freq, start, dur]) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.gain.setValueAtTime(0, ctx.currentTime + start);
+      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + dur);
+    });
+  } catch { /* audio unavailable */ }
+}
+
 // ── Page-title unread badge ───────────────────────────────
-// Tracks the previous unread total so we only update the title on change.
 let prevUnreadTotal = 0;
 const BASE_TITLE = document.title;
 
 function updateTitleBadge(convList) {
   const total = convList.reduce((sum, c) => sum + (c.unread || 0), 0);
   document.title = total > 0 ? `(${total}) ${BASE_TITLE}` : BASE_TITLE;
+  if (total > prevUnreadTotal) playNotificationSound();
   prevUnreadTotal = total;
 }
 
