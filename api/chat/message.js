@@ -40,7 +40,7 @@ async function getAIReply(userMessage, conversationId, supabase) {
   const embeddingRes = await openai.embeddings.create({ model: 'text-embedding-3-small', input: userMessage });
   const embedding = embeddingRes.data[0].embedding;
 
-  const { data: chunks } = await supabase.rpc('match_knowledge_chunks', { query_embedding: embedding, match_threshold: 0.5, match_count: 4 });
+  const { data: chunks } = await supabase.rpc('match_knowledge_chunks', { query_embedding: embedding, match_threshold: 0.3, match_count: 8 });
 
   const context = chunks?.length
     ? chunks.map(c => `[${c.title}]\n${c.chunk_text}`).join('\n\n---\n\n')

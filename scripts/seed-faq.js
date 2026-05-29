@@ -68,7 +68,9 @@ If you choose, auditors can be given secure, read-only access. This allows them 
 Does Cenaris replace legal or professional advice?
 No. Cenaris is a compliance support platform. It does not provide legal advice, clinical advice, or certification guarantees. Responsibility for regulatory compliance remains with the provider organisation.
 
-What are the Cenaris pricing plans?
+What are the Cenaris pricing plans? How much does Cenaris cost? What is the price?
+
+Cenaris has four plans. These are indicative prices ahead of the 1 July 2026 launch; waitlist members lock in founding-member rates.
 
 Free plan: $0 per month, forever free. Includes evidence repository, one compliance framework, manual tagging, basic dashboard, limited Policy Studio, and limited high-level mapping. Good for getting a feel for the platform.
 
