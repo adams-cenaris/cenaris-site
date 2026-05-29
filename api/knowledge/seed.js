@@ -1,6 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const OpenAI = require('openai');
-const { verifyAdmin } = require('../../_shared/auth');
+const { verifyAdmin } = require('../_shared/auth');
 
 function getClient() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
