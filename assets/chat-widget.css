@@ -139,6 +139,11 @@
   color: #1a2b3c;
   border-bottom-left-radius: 4px;
 }
+.cw-msg.agent a, .cw-msg.ai a, .cw-msg.system a {
+  color: #4A9FCC;
+  text-decoration: underline;
+  word-break: break-all;
+}
 .cw-msg-meta {
   font-size: 11px;
   opacity: .6;

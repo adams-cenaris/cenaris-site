@@ -116,11 +116,44 @@
     }
   }
 
+  // Matches https://... URLs and bare domain/path URLs like cenaris.com.au/sign-up
+  const URL_RE = /(https?:\/\/[^\s]+|(?:[a-zA-Z0-9][-a-zA-Z0-9]*\.)+[a-zA-Z]{2,}\/[^\s]*)/g;
+
+  function linkify(text) {
+    const fragment = document.createDocumentFragment();
+    let last = 0;
+    let match;
+    URL_RE.lastIndex = 0;
+    while ((match = URL_RE.exec(text)) !== null) {
+      if (match.index > last) {
+        fragment.appendChild(document.createTextNode(text.slice(last, match.index)));
+      }
+      // Strip trailing sentence punctuation that isn't part of the URL
+      const raw = match[0].replace(/[.,;:!?)]+$/, '');
+      const trailing = match[0].slice(raw.length);
+      const a = document.createElement('a');
+      a.href = raw.startsWith('http') ? raw : 'https://' + raw;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = raw;
+      fragment.appendChild(a);
+      if (trailing) fragment.appendChild(document.createTextNode(trailing));
+      last = match.index + match[0].length;
+    }
+    if (last < text.length) fragment.appendChild(document.createTextNode(text.slice(last)));
+    return fragment;
+  }
+
   function renderMessage(msg) {
     const div = document.createElement('div');
     div.className = `cw-msg ${msg.sender_type}`;
-    div.textContent = msg.body;
     div.dataset.id = msg.id;
+    const isBot = msg.sender_type === 'ai' || msg.sender_type === 'agent' || msg.sender_type === 'system';
+    if (isBot) {
+      div.appendChild(linkify(msg.body));
+    } else {
+      div.textContent = msg.body;
+    }
     $('cw-messages').insertBefore(div, $('cw-typing'));
     scrollBottom();
   }
