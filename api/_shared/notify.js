@@ -91,13 +91,31 @@ async function logNotification(supabase, conversationId, type, channel) {
  * Only 'sent' and 'failed' trigger a cooldown log entry — 'not_configured'
  * does not log so the cooldown resets once OneSignal is set up.
  */
-async function sendPush(title) {
+async function getSubscriptionIds(supabase) {
+  try {
+    const { data } = await supabase
+      .from('admin_push_subscriptions')
+      .select('subscription_id');
+    return (data || []).map(r => r.subscription_id);
+  } catch {
+    return [];
+  }
+}
+
+async function sendPush(title, supabase) {
   const appId  = process.env.ONESIGNAL_APP_ID;
   const apiKey = process.env.ONESIGNAL_REST_API_KEY;
   if (!appId || !apiKey) {
     console.log('[notify] push skipped — ONESIGNAL_APP_ID / ONESIGNAL_REST_API_KEY not set');
     return 'not_configured';
   }
+
+  const ids = await getSubscriptionIds(supabase);
+  if (ids.length === 0) {
+    console.log('[notify] push skipped — no admin subscriptions registered');
+    return 'not_configured';
+  }
+
   try {
     const res = await fetch('https://onesignal.com/api/v1/notifications', {
       method: 'POST',
@@ -107,7 +125,7 @@ async function sendPush(title) {
       },
       body: JSON.stringify({
         app_id: appId,
-        included_segments: ['Subscribed Users'],
+        include_subscription_ids: ids,
         headings: { en: title },
         contents: { en: 'Tap to open the Cenaris admin console.' },
         url: 'https://cenaris.com.au/admin/chat',
@@ -220,7 +238,7 @@ async function notifyAdmin(params, supabase) {
 
   if (!pushCooldown) {
     ops.push(
-      sendPush(title).then(result => {
+      sendPush(title, supabase).then(result => {
         // Only log on success so a transient OneSignal failure doesn't activate
         // the cooldown and suppress future alerts for this conversation.
         if (result === 'sent') {

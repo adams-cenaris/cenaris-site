@@ -441,7 +441,21 @@ refreshConversations = async function () {
 
 // ── OneSignal push notification subscription ─────────────
 async function initPushNotifications() {
-  if (!('Notification' in window)) return;
+  const area = document.getElementById('notif-area');
+  const btn  = document.getElementById('notif-btn');
+
+  // iOS Safari doesn't support web push outside of a PWA (Add to Home Screen).
+  if (!('Notification' in window)) {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIOS) {
+      area.style.display = 'flex';
+      btn.textContent = 'Install app for notifications';
+      btn.disabled = false;
+      btn.title = 'Open this page in Safari, tap Share → Add to Home Screen, then re-open from your home screen to enable push notifications.';
+      btn.addEventListener('click', () => alert('To get push notifications on iPhone:\n\n1. Open cenaris.com.au/admin/chat in Safari\n2. Tap the Share button (box with arrow)\n3. Tap "Add to Home Screen"\n4. Open the app from your home screen\n5. Tap "Enable notifications"'));
+    }
+    return;
+  }
 
   let appId;
   try {
@@ -450,8 +464,6 @@ async function initPushNotifications() {
   } catch { return; }
   if (!appId) return;
 
-  const area    = document.getElementById('notif-area');
-  const btn     = document.getElementById('notif-btn');
   const testBtn = document.getElementById('notif-test-btn');
   area.style.display = 'flex';
 
@@ -524,7 +536,11 @@ async function initPushNotifications() {
 
       if (s === 'enabled') {
         btn.textContent = 'Turning off…';
+        const oldId = OneSignal.User.PushSubscription.id;
         await OneSignal.User.PushSubscription.optOut();
+        if (oldId) {
+          apiFetch('/api/admin/push-subscription', { method: 'DELETE', body: JSON.stringify({ subscriptionId: oldId }) }).catch(() => {});
+        }
         await new Promise(r => setTimeout(r, 500));
         applyState();
         return;
@@ -539,7 +555,12 @@ async function initPushNotifications() {
           await OneSignal.User.PushSubscription.optIn();
         }
       }
-      await new Promise(r => setTimeout(r, 1000));
+      // Wait for OneSignal to register, then save the subscription ID
+      await new Promise(r => setTimeout(r, 1500));
+      const sid = OneSignal.User.PushSubscription.id;
+      if (sid) {
+        apiFetch('/api/admin/push-subscription', { method: 'POST', body: JSON.stringify({ subscriptionId: sid }) }).catch(() => {});
+      }
       applyState();
     });
 
@@ -551,13 +572,15 @@ async function initPushNotifications() {
         console.log('[notify] test result', r);
         if (r.recipients > 0) {
           testBtn.textContent = `Sent ✓ (${r.recipients})`;
+        } else if (r.reason === 'no_subscriptions') {
+          testBtn.textContent = 'Not registered — re-enable';
+          console.warn('[notify] No subscription IDs saved. Click the notification button to re-subscribe.');
         } else if (r.error) {
-          const msg = r.error?.errors?.[0] || JSON.stringify(r.error);
           testBtn.textContent = 'Error — check console';
-          console.error('[notify] OneSignal error:', msg, r);
+          console.error('[notify] OneSignal error:', r);
         } else {
-          testBtn.textContent = 'No subscribers — re-enable';
-          console.warn('[notify] 0 recipients. Sub ID:', OneSignal.User.PushSubscription.id);
+          testBtn.textContent = `Sent (${r.recipients ?? 0} received)`;
+          console.log('[notify] test result', r);
         }
       } catch (err) {
         testBtn.textContent = 'Failed — check console';
