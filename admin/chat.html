@@ -441,9 +441,10 @@ refreshConversations = async function () {
 document.getElementById('notif-test-btn').addEventListener('click', async function () {
   this.textContent = 'Sending…';
   this.disabled = true;
+  playNotificationSound();
   try {
-    await apiFetch('/api/admin/test-notification', { method: 'POST' });
-    this.textContent = 'Sent ✓';
+    const r = await apiFetch('/api/admin/test-notification', { method: 'POST' });
+    this.textContent = r?.ok === false ? 'Failed — check Vercel logs' : 'Sent ✓';
   } catch {
     this.textContent = 'Failed';
   }
