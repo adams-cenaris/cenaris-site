@@ -547,6 +547,17 @@ async function initPushNotifications() {
       }
 
       btn.textContent = 'Working…';
+
+      // Unregister any stale OneSignal service worker so the new subscription
+      // is created under the current App ID, not a previously cached one.
+      try {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+        console.log('[notify] cleared', regs.length, 'service worker(s)');
+      } catch (e) {
+        console.warn('[notify] SW unregister failed', e);
+      }
+
       if (np === 'granted') {
         await OneSignal.User.PushSubscription.optIn();
       } else {
@@ -555,9 +566,10 @@ async function initPushNotifications() {
           await OneSignal.User.PushSubscription.optIn();
         }
       }
-      // Wait for OneSignal to register, then save the subscription ID
-      await new Promise(r => setTimeout(r, 1500));
+      // Wait for OneSignal to register, then save the new subscription ID
+      await new Promise(r => setTimeout(r, 2000));
       const sid = OneSignal.User.PushSubscription.id;
+      console.log('[notify] new subscriptionId after re-register:', sid);
       if (sid) {
         apiFetch('/api/admin/push-subscription', { method: 'POST', body: JSON.stringify({ subscriptionId: sid }) }).catch(() => {});
       }
