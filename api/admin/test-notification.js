@@ -76,10 +76,18 @@ module.exports = requireAdmin(async function handler(req, res) {
       console.log('[test-notification] retrying with include_player_ids');
       ({ ok, json } = await sendOneSignal(appId, apiKey, { include_player_ids: ids }));
     }
+    // Final fallback: broadcast to ALL segment to confirm app has any subscribers at all
+    if (ok && (json.recipients ?? 0) === 0) {
+      console.log('[test-notification] retrying with included_segments All');
+      ({ ok, json } = await sendOneSignal(appId, apiKey, { included_segments: ['All'] }));
+      if (ok) {
+        return res.json({ ok: true, recipients: json.recipients ?? 0, id: json.id, errors: json.errors, method: 'segment_all', storedIds: ids });
+      }
+    }
     if (!ok) {
       return res.status(500).json({ ok: false, errors: json.errors, error: json });
     }
-    return res.json({ ok: true, recipients: json.recipients ?? 0, id: json.id, errors: json.errors });
+    return res.json({ ok: true, recipients: json.recipients ?? 0, id: json.id, errors: json.errors, storedIds: ids });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err?.message });
   }
