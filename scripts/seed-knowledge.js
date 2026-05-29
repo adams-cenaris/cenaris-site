@@ -5,26 +5,35 @@
  *   node scripts/seed-knowledge.js
  *
  * Requires:
- *   SITE_URL     — base URL of your deployed site (or http://localhost:3000 for local)
- *   ADMIN_TOKEN  — JWT from /api/admin/auth (or copy from localStorage after logging in)
+ *   SITE_URL       — base URL of your deployed site (or http://localhost:3000 for local)
+ *   ADMIN_PASSWORD — your admin password (preferred), OR
+ *   ADMIN_TOKEN    — a JWT copied from localStorage after logging in
  *
  * Run with env vars:
- *   SITE_URL=https://cenaris.com.au ADMIN_TOKEN=eyJ... node scripts/seed-knowledge.js
+ *   SITE_URL=https://cenaris.com.au ADMIN_PASSWORD=yourpassword node scripts/seed-knowledge.js
  */
 
 const fs   = require('fs');
 const path = require('path');
 
-const SITE_URL   = process.env.SITE_URL || 'http://localhost:3000';
-const TOKEN      = process.env.ADMIN_TOKEN;
-const SITE_ROOT  = path.join(__dirname, '..');
+const SITE_URL  = process.env.SITE_URL || 'http://localhost:3000';
+const SITE_ROOT = path.join(__dirname, '..');
 
-if (!TOKEN) {
-  console.error('\nERROR: Set ADMIN_TOKEN env var.\n');
-  console.error('  1. Go to ' + SITE_URL + '/admin/login and sign in');
-  console.error('  2. Open DevTools → Application → Local Storage → copy cenaris-admin-token');
-  console.error('  3. Run: SITE_URL=https://cenaris.com.au ADMIN_TOKEN=<token> node scripts/seed-knowledge.js\n');
-  process.exit(1);
+async function getToken() {
+  if (process.env.ADMIN_TOKEN) return process.env.ADMIN_TOKEN;
+  if (!process.env.ADMIN_PASSWORD) {
+    console.error('\nERROR: Set ADMIN_PASSWORD (or ADMIN_TOKEN) env var.\n');
+    console.error('  Run: SITE_URL=https://cenaris.com.au ADMIN_PASSWORD=yourpassword node scripts/seed-knowledge.js\n');
+    process.exit(1);
+  }
+  const res  = await fetch(SITE_URL + '/api/admin/auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: process.env.ADMIN_PASSWORD }),
+  });
+  const data = await res.json();
+  if (!data.token) { console.error('Auth failed:', data); process.exit(1); }
+  return data.token;
 }
 
 // Pages to index — { file, title, url }
@@ -70,7 +79,7 @@ function stripHtml(html) {
     .trim();
 }
 
-async function seedPage({ file, title, url }) {
+async function seedPage({ file, title, url }, token) {
   const filePath = path.join(SITE_ROOT, file);
   if (!fs.existsSync(filePath)) {
     console.warn('  SKIP  ' + file + ' (file not found)');
@@ -91,7 +100,7 @@ async function seedPage({ file, title, url }) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + TOKEN,
+      'Authorization': 'Bearer ' + token,
     },
     body: JSON.stringify({ title, sourceUrl, content }),
   });
@@ -105,10 +114,11 @@ async function seedPage({ file, title, url }) {
 }
 
 async function main() {
+  const token = await getToken();
   console.log('\nSeeding knowledge base at ' + SITE_URL + '\n');
   for (const page of PAGES) {
     process.stdout.write('Seeding ' + page.file + '… ');
-    await seedPage(page);
+    await seedPage(page, token);
   }
   console.log('\nDone. The AI assistant will now use this content to answer questions.\n');
 }
