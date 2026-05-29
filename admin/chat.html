@@ -582,17 +582,18 @@ async function initPushNotifications() {
       try {
         const r = await apiFetch('/api/admin/test-notification', { method: 'POST' });
         console.log('[notify] test result', r);
+        console.log('[notify] test result', r);
         if (r.recipients > 0) {
           testBtn.textContent = `Sent ✓ (${r.recipients})`;
-        } else if (r.reason === 'no_subscriptions') {
-          testBtn.textContent = 'Not registered — re-enable';
-          console.warn('[notify] No subscription IDs saved. Click the notification button to re-subscribe.');
-        } else if (r.error) {
+        } else if (r.errors?.length) {
           testBtn.textContent = 'Error — check console';
-          console.error('[notify] OneSignal error:', r);
+          console.error('[notify] OneSignal errors:', r.errors);
+        } else if (r.reason === 'no_stored_ids_used_segment') {
+          testBtn.textContent = `Segment fallback: ${r.recipients ?? 0} recipients`;
+          console.warn('[notify] No stored IDs — used segment. Re-enable notifications to register.');
         } else {
-          testBtn.textContent = `Sent (${r.recipients ?? 0} received)`;
-          console.log('[notify] test result', r);
+          testBtn.textContent = `0 recipients — check console`;
+          console.warn('[notify] 0 recipients. Full result:', r);
         }
       } catch (err) {
         testBtn.textContent = 'Failed — check console';
