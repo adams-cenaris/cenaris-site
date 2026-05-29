@@ -539,7 +539,7 @@ async function initPushNotifications() {
         const oldId = OneSignal.User.PushSubscription.id;
         await OneSignal.User.PushSubscription.optOut();
         if (oldId) {
-          apiFetch('/api/admin/push-subscription', { method: 'DELETE', body: JSON.stringify({ subscriptionId: oldId }) }).catch(() => {});
+          apiFetch('/api/admin/test-notification', { method: 'DELETE', body: JSON.stringify({ subscriptionId: oldId }) }).catch(() => {});
         }
         await new Promise(r => setTimeout(r, 500));
         applyState();
@@ -571,7 +571,7 @@ async function initPushNotifications() {
       const sid = OneSignal.User.PushSubscription.id;
       console.log('[notify] new subscriptionId after re-register:', sid);
       if (sid) {
-        apiFetch('/api/admin/push-subscription', { method: 'POST', body: JSON.stringify({ subscriptionId: sid }) }).catch(() => {});
+        apiFetch('/api/admin/test-notification', { method: 'POST', body: JSON.stringify({ subscriptionId: sid }) }).catch(() => {});
       }
       applyState();
     });
