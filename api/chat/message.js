@@ -46,7 +46,7 @@ async function getAIReply(userMessage, conversationId, supabase) {
     ? chunks.map(c => `[${c.title}]\n${c.chunk_text}`).join('\n\n---\n\n')
     : '';
 
-  const { data: history } = await supabase.from('messages').select('sender_type, body').eq('conversation_id', conversationId).order('created_at', { ascending: false }).limit(10);
+  const { data: history } = await supabase.from('messages').select('sender_type, body').eq('conversation_id', conversationId).neq('sender_type', 'system').order('created_at', { ascending: false }).limit(10);
   const historyMessages = (history || []).reverse().map(m => ({ role: m.sender_type === 'visitor' ? 'user' : 'assistant', content: m.body }));
 
   const completion = await openai.chat.completions.create({

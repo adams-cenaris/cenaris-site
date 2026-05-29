@@ -2,6 +2,7 @@ const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 const { notifyAdmin } = require('../_shared/notify');
 const { handleCors } = require('../_shared/cors');
+const { checkRateLimit } = require('../_shared/ratelimit');
 
 function getClient() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
@@ -21,6 +22,9 @@ function escAttr(str) {
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  // 5 lead submissions per IP per 5 minutes
+  if (await checkRateLimit(req, res, 'chat:lead', 5, 300)) return;
 
   const { conversationId, name, email, phone, enquiryType, marketingOptIn, sessionId } = req.body || {};
   if (!name?.trim() || !email?.trim()) return res.status(400).json({ error: 'name and email are required' });
@@ -73,8 +77,8 @@ module.exports = async function handler(req, res) {
       method: 'POST',
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'Cenaris Chat <noreply@cenaris.com.au>',
-        to: ['info@cenaris.com.au'],
+        from: process.env.EMAIL_FROM || 'Cenaris Chat <noreply@cenaris.com.au>',
+        to: [process.env.ADMIN_NOTIFICATION_EMAIL || 'info@cenaris.com.au'],
         subject: `New chat enquiry — ${name.trim()}`,
         html: `<h2>New chat enquiry</h2><table cellpadding="6"><tr><td><strong>Name</strong></td><td>${escHtml(name.trim())}</td></tr><tr><td><strong>Email</strong></td><td>${escHtml(email.trim())}</td></tr>${phone ? `<tr><td><strong>Phone</strong></td><td>${escHtml(phone.trim())}</td></tr>` : ''}<tr><td><strong>Enquiry type</strong></td><td>${escHtml(enquiryType || 'General')}</td></tr>${firstMsg ? `<tr><td><strong>First message</strong></td><td>${escHtml(firstMsg.body)}</td></tr>` : ''}<tr><td><strong>Marketing opt-in</strong></td><td>${marketingOptIn ? 'Yes' : 'No'}</td></tr></table>${conversationId ? `<p><a href="https://cenaris.com.au/admin/chat?c=${escAttr(conversationId)}">View in admin console</a></p>` : ''}<p style="color:#888;font-size:12px">${escHtml(PRIVACY_NOTICE)}</p>`,
       }),

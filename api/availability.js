@@ -1,4 +1,5 @@
 const { getClient } = require('./_shared/supabase');
+const { checkRateLimit } = require('./_shared/ratelimit');
 
 // Mon–Fri 09:00–17:00 AEST/AEDT (Australia/Sydney handles DST automatically)
 const BUSINESS_HOURS = { start: 9, end: 17 };
@@ -22,6 +23,9 @@ function isWithinBusinessHours() {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+
+  // 60 checks per IP per minute — loose limit to prevent DB hammering
+  if (await checkRateLimit(req, res, 'availability', 60, 60)) return;
 
   let available = isWithinBusinessHours();
 
