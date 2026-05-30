@@ -52,6 +52,8 @@
 <script>
   // Conversion anchor: fires when user reaches this page after form submission.
   if (typeof window.trackEvent === 'function') window.trackEvent('partner_enquiry_submit', { page_location: window.location.pathname });
+  // Google Ads conversion — replace AW-17864169727/LABEL with your specific conversion action label once created in Google Ads.
+  if (typeof window.trackAdsConversion === 'function') window.trackAdsConversion('AW-17864169727');
 </script>
 </body>
 </html>

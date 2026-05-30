@@ -1,11 +1,7 @@
 /**
- * Cenaris — Analytics (GA4 + Microsoft Clarity)
+ * Cenaris — Analytics (GA4 + Google Ads + Microsoft Clarity)
  *
  * Loads only after explicit cookie consent. Runs only on cenaris.com.au.
- *
- * IDs: Replace the placeholder strings before going live.
- *   GA4:     Google Analytics Admin → Data streams → Measurement ID (G-XXXXXXXXXX)
- *   Clarity: Microsoft Clarity → Settings → Overview → Project ID (10-char string)
  *
  * PRIVACY — strictly enforced:
  *   Never pass to any analytics call: names, email addresses, phone numbers,
@@ -16,6 +12,8 @@
 
 const _GA4_ID     = 'G-JRRFYW0XYY';
 const _CLARITY_ID = 'wvzpun60gq';
+const _ADS_ID     = 'AW-17864169727';
+const _GT_ID      = 'GT-TBZR594N';
 
 // Analytics fires only on the live domain — not localhost or Vercel preview URLs.
 const _isProd = (
@@ -25,22 +23,26 @@ const _isProd = (
 
 // ─── Loaders ──────────────────────────────────────────────────────────────
 
-function _loadGA4() {
+function _loadGoogleTags() {
   if (window.__cenGA4) return;
   window.__cenGA4 = true;
   window.dataLayer = window.dataLayer || [];
   // Define gtag before the script loads so queued events are buffered correctly.
   window.gtag = function() { window.dataLayer.push(arguments); };
   window.gtag('js', new Date());
+  // GA4 — anonymised, no ad signals (NDIS privacy requirement).
   window.gtag('config', _GA4_ID, {
-    // Disable ad-audience and remarketing signals — not needed for B2B SaaS.
     allow_google_signals: false,
     allow_ad_personalization_signals: false,
     anonymize_ip: true,
   });
+  // Google Ads & unified Google Tag.
+  window.gtag('config', _ADS_ID);
+  window.gtag('config', _GT_ID);
+  // Load via the unified GT- tag so all products share one script.
   const s = document.createElement('script');
   s.async = true;
-  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + _GA4_ID;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + _GT_ID;
   document.head.appendChild(s);
 }
 
@@ -71,7 +73,7 @@ function _loadClarity() {
 
 function _init() {
   if (!_isProd) return;
-  _loadGA4();
+  _loadGoogleTags();
   _loadClarity();
 }
 
@@ -90,6 +92,12 @@ window.cenarisCookieAccept = _init;
 function trackEvent(name, params) {
   try { if (typeof window.gtag === 'function') window.gtag('event', name, params || {}); } catch(_) {}
   try { if (typeof window.clarity === 'function') window.clarity('event', name); } catch(_) {}
+}
+
+// Fires a Google Ads conversion. Pass the full send_to label (AW-XXXXXXX/label)
+// for a specific conversion action, or omit to fire at the account level.
+function trackAdsConversion(sendTo) {
+  try { if (typeof window.gtag === 'function') window.gtag('event', 'conversion', { send_to: sendTo || _ADS_ID }); } catch(_) {}
 }
 
 // Primary conversion events
