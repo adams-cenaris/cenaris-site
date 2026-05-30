@@ -46,15 +46,14 @@
     const data = Object.assign({ form: formName }, fields, readTrackingContext());
     if (data.company_website) return { ok: true, dropped: 'honeypot' };
     try {
-      const res = await fetch(ENDPOINT, {
+      await fetch(ENDPOINT, {
         method: 'POST',
-        mode: 'cors',
+        mode: 'no-cors',
         keepalive: true, // allow the request to complete after page navigation
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(data),
       });
-      const json = await res.json().catch(() => ({ ok: res.ok }));
-      return json;
+      return { ok: true };
     } catch (err) {
       console.error('[cenaris-forms] programmatic submit failed:', err);
       return { ok: false, error: String(err) };
@@ -112,16 +111,14 @@
       Object.assign(data, readTrackingContext());
 
       try {
-        // text/plain content-type avoids CORS preflight against Apps Script.
-        // Apps Script still receives the raw JSON in e.postData.contents.
-        const res = await fetch(ENDPOINT, {
+        // text/plain + no-cors avoids preflight; Apps Script follows a redirect
+        // whose response is opaque, so we treat fetch-without-throw as success.
+        await fetch(ENDPOINT, {
           method: 'POST',
-          mode: 'cors',
+          mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(data),
         });
-        const json = await res.json().catch(() => ({ ok: res.ok }));
-        if (!json.ok) throw new Error(json.error || 'Submission failed');
         // Track conversion — form type only, no PII.
         try {
           if (typeof window.trackLeadFormSubmit === 'function') window.trackLeadFormSubmit(formName);
