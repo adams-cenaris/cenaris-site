@@ -166,6 +166,7 @@
   }
 
   // -- Countdown updates -----------------------
+  const lastVals = {};
   function tick() {
     const now = Date.now();
     const diff = Math.max(0, launchTime - now);
@@ -179,7 +180,17 @@
         <div class="seg"><div class="v">${String(h).padStart(2,'0')}</div><div class="l">Hours</div></div>
         <div class="seg"><div class="v">${String(m).padStart(2,'0')}</div><div class="l">Minutes</div></div>
         <div class="seg"><div class="v">${String(s).padStart(2,'0')}</div><div class="l">Seconds</div></div>`;
+      if (lastVals.initted) {
+        const segs = node.querySelectorAll('.seg');
+        [[0,d,'d'],[1,h,'h'],[2,m,'m'],[3,s,'s']].forEach(([i, val, key]) => {
+          if (lastVals[key] !== val) {
+            segs[i].classList.add('ticked');
+            setTimeout(() => segs[i].classList.remove('ticked'), 250);
+          }
+        });
+      }
     });
+    lastVals.d = d; lastVals.h = h; lastVals.m = m; lastVals.s = s; lastVals.initted = true;
     document.querySelectorAll('[data-mini-cd]').forEach(node => {
       node.textContent = `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     });
