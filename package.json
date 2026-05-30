@@ -1,6 +1,8 @@
 {
   "private": true,
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.0",
     "@upstash/ratelimit": "^2.0.4",
@@ -8,5 +10,8 @@
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
     "openai": "^4.67.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
   }
 }

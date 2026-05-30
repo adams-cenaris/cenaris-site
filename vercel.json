@@ -16,7 +16,7 @@
         { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.clarity.ms; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.clarity.ms https://clarity.ms; img-src 'self' data: https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com;"
+          "value": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.clarity.ms; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.clarity.ms https://clarity.ms https://script.google.com; img-src 'self' data: https://www.google-analytics.com https://images.unsplash.com; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com;"
         }
       ]
     },
@@ -26,7 +26,7 @@
         { "key": "Cache-Control", "value": "no-store" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://cdn.onesignal.com https://api.onesignal.com; worker-src 'self' blob: https://cdn.onesignal.com; connect-src 'self' https://onesignal.com https://api.onesignal.com https://cdn.onesignal.com; img-src 'self' https://cenaris.com.au; style-src 'self' 'unsafe-inline' https://cdn.onesignal.com https://onesignal.com; style-src-elem 'self' 'unsafe-inline' https://cdn.onesignal.com https://onesignal.com; frame-ancestors 'none'; base-uri 'self';"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self';"
         }
       ]
     },

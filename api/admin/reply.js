@@ -11,6 +11,7 @@ module.exports = async function handler(req, res) {
 
   const { conversationId, body } = req.body || {};
   if (!conversationId || !body?.trim()) return res.status(400).json({ error: 'conversationId and body required' });
+  if (body.length > 10000) return res.status(400).json({ error: 'Reply too long' });
 
   const supabase = getClient();
   const { data: conv, error: convErr } = await supabase.from('conversations').select('id, status').eq('id', conversationId).maybeSingle();

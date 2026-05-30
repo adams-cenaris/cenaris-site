@@ -72,6 +72,10 @@ module.exports = async function handler(req, res) {
   }, supabase).catch(err => console.error('[lead] notify error', err?.message));
 
   try {
+    if (!process.env.RESEND_API_KEY) {
+      console.log('[lead] email skipped — RESEND_API_KEY not set');
+      return res.status(200).json({ ok: true });
+    }
     const { data: firstMsg } = await supabase.from('messages').select('body').eq('conversation_id', conversationId).eq('sender_type', 'visitor').order('created_at', { ascending: true }).limit(1).maybeSingle();
     await fetch('https://api.resend.com/emails', {
       method: 'POST',

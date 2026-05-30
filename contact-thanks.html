@@ -10,7 +10,7 @@
 <link rel="icon" href="assets/favicon-icon.png" />
 <link rel="stylesheet" href="assets/site.css" />
 </head>
-<body>
+<body data-page="contact">
 <a class="skip-link" href="#main">Skip to content</a>
 <div id="prelaunch"></div>
 <div id="nav"></div>
@@ -37,13 +37,14 @@
 
 <div id="footer"></div>
 <div id="cookie"></div>
-<script>window.CENARIS_PAGE = 'contact';</script>
 <script src="assets/analytics.js"></script>
 <script src="assets/chrome.js"></script>
 
 <script>
   // Conversion anchor: fires when user reaches this page after form submission.
   if (typeof window.trackEvent === 'function') window.trackEvent('contact_form_submit', { page_location: window.location.pathname });
+  // Google Ads conversion — replace AW-17864169727/LABEL with your specific conversion action label once created in Google Ads.
+  if (typeof window.trackAdsConversion === 'function') window.trackAdsConversion('AW-17864169727');
 </script>
 </body>
 </html>

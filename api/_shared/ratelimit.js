@@ -51,7 +51,7 @@ async function checkRateLimit(req, res, key, requests, windowSeconds) {
   if (!limiter) return false; // not configured — allow through
 
   const ip = req.headers['x-real-ip']
-    ?? req.headers['x-forwarded-for']?.split(',').pop()?.trim()
+    ?? req.headers['x-forwarded-for']?.split(',')[0]?.trim()
     ?? '127.0.0.1';
   try {
     const { success, reset } = await limiter.limit(ip);

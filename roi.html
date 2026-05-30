@@ -9,7 +9,7 @@
 <link rel="icon" href="assets/favicon-icon.png" />
 <link rel="stylesheet" href="assets/site.css" />
 </head>
-<body>
+<body data-page="calc">
 <a class="skip-link" href="#main">Skip to content</a>
 <div id="prelaunch"></div>
 <div id="nav"></div>
@@ -57,9 +57,9 @@
 
         <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--gray-100);display:flex;gap:10px;flex-wrap:wrap">
           <span style="font-size:13px;color:var(--gray-600);align-self:center">Quick presets:</span>
-          <button class="btn btn-secondary btn-sm" onclick="preset(8,6,75,4,8000,2)">Small (&asymp;8 staff)</button>
-          <button class="btn btn-secondary btn-sm" onclick="preset(25,12,75,6,18000,4)">Mid (&asymp;25)</button>
-          <button class="btn btn-secondary btn-sm" onclick="preset(80,32,80,10,55000,8)">Large (&asymp;80)</button>
+          <button class="btn btn-secondary btn-sm" data-preset="8,6,75,4,8000,2">Small (&asymp;8 staff)</button>
+          <button class="btn btn-secondary btn-sm" data-preset="25,12,75,6,18000,4">Mid (&asymp;25)</button>
+          <button class="btn btn-secondary btn-sm" data-preset="80,32,80,10,55000,8">Large (&asymp;80)</button>
         </div>
       </div>
 
@@ -124,206 +124,15 @@
 <div id="footer"></div>
 <div id="cookie"></div>
 
-<script>
-// Plan tiers, mapped by staff count. Annual figures match /pricing.html.
-const PLANS = [
-  { maxStaff: 10,       name: 'Tier 1 Essentials',     monthly: 149,   annual: 1788  },
-  { maxStaff: 50,       name: 'Tier 2 Assurance',      monthly: 349,   annual: 4188  },
-  { maxStaff: 150,      name: 'Tier 3 Confidence',     monthly: 699,   annual: 8388  },
-  { maxStaff: Infinity, name: 'Enterprise (from)',     monthly: 1499,  annual: 17988 },
-];
-function pickPlan(staff) {
-  return PLANS.find(p => staff <= p.maxStaff) || PLANS[PLANS.length - 1];
-}
-
-// Latest computed snapshot, populated by compute(), read by the CTA capture.
-const ROI_STATE = {};
-
-const fmt = n => '$' + Math.round(n).toLocaleString('en-AU');
-const animate = (el, to, prefix='$') => {
-  const from = parseFloat(el.dataset.v || 0);
-  const start = performance.now();
-  const step = (t) => {
-    const p = Math.min(1, (t - start) / 500);
-    const eased = 1 - Math.pow(1 - p, 3);
-    const v = from + (to - from) * eased;
-    el.textContent = prefix + Math.round(v).toLocaleString('en-AU');
-    if (p < 1) requestAnimationFrame(step);
-    else el.dataset.v = to;
-  };
-  requestAnimationFrame(step);
-};
-
-function compute() {
-  const staff = +document.getElementById('i-staff').value || 0;
-  const hours = +document.getElementById('i-hours').value || 0;
-  const rate = +document.getElementById('i-rate').value || 0;
-  const weeks = +document.getElementById('i-weeks').value || 0;
-  const consult = +document.getElementById('i-consult').value || 0;
-  const noncon = +document.getElementById('i-noncon').value || 0;
-
-  // Current costs
-  const ongoingNow = hours * rate * 52;
-  const auditNow = (weeks * 40 * rate) / 3;     // amortised over 3-yr cycle
-  const consultNow = consult;
-  const ncNow = noncon * 3500 / 3;              // amortised
-  const totalNow = ongoingNow + auditNow + consultNow + ncNow;
-
-  // After Cenaris
-  const ongoingNew = ongoingNow * 0.45;
-  const auditNew = auditNow * 0.30;
-  const consultNew = consultNow * 0.60;
-  const ncNew = ncNow * 0.40;
-  const plan = pickPlan(staff);
-  const subscription = plan.annual;
-  const totalNew = ongoingNew + auditNew + consultNew + ncNew + subscription;
-
-  const savings = Math.max(0, totalNow - totalNew);
-  const pct = totalNow > 0 ? Math.round(savings / totalNow * 100) : 0;
-  const payback = subscription > 0 ? (subscription / Math.max(1, savings/12)).toFixed(1) : '--';
-
-  animate(document.getElementById('o-current'), totalNow);
-  animate(document.getElementById('o-cenaris'), totalNew);
-  animate(document.getElementById('o-savings'), savings);
-  document.getElementById('o-pct').textContent = pct;
-  document.getElementById('o-payback').textContent = (savings > 0 && payback !== '--') ? `${payback} months` : '--';
-  document.getElementById('o-plan').textContent = `${plan.name} &middot; $${plan.monthly}/mo &middot; billed annually`;
-
-  // Stash everything for the CTA capture handlers.
-  Object.assign(ROI_STATE, {
-    staff, hours, rate, weeks, consult, noncon,
-    plan_name: plan.name,
-    plan_monthly: plan.monthly,
-    plan_annual: plan.annual,
-    current_cost: Math.round(totalNow),
-    cenaris_cost: Math.round(totalNew),
-    savings: Math.round(savings),
-    savings_pct: pct,
-    payback_months: payback,
-  });
-
-  // Breakdown bars
-  const items = [
-    ['Staff hours saved', ongoingNow - ongoingNew, '#4A9FCC'],
-    ['Audit prep saved',  auditNow - auditNew,    '#16A34A'],
-    ['Consultant spend',  consultNow - consultNew,'#D97706'],
-    ['Non-conformities',  ncNow - ncNew,          '#7C3AED'],
-  ];
-  const max = Math.max(1, ...items.map(i=>i[1]));
-  const wrap = document.getElementById('breakdown');
-  wrap.innerHTML = items.map(([label,v,c])=>`
-    <div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
-        <span style="color:var(--gray-700)">${label}</span>
-        <strong style="color:var(--gray-900);font-variant-numeric:tabular-nums">${fmt(v)}</strong>
-      </div>
-      <div class="mock-bar"><span style="width:${(v/max)*100}%;background:${c}"></span></div>
-    </div>
-  `).join('');
-}
-
-function preset(s,h,r,w,c,n) {
-  document.getElementById('i-staff').value = s;
-  document.getElementById('i-hours').value = h;
-  document.getElementById('i-rate').value = r;
-  document.getElementById('i-weeks').value = w;
-  document.getElementById('i-consult').value = c;
-  document.getElementById('i-noncon').value = n;
-  compute();
-}
-
-document.querySelectorAll('#i-staff, #i-hours, #i-rate, #i-weeks, #i-consult, #i-noncon').forEach(el => el.addEventListener('input', compute));
-compute();
-
-// -- CTA capture: send {ROI inputs + outputs + email + intent} to Apps Script
-// when the user clicks either button, then continue to the destination.
-// Uses fetch with keepalive:true so the request survives the navigation.
-function captureRoiClick(intent, destinationHref, newTab) {
-  const emailEl = document.getElementById('roi-email');
-  const msgEl   = document.getElementById('roi-cta-msg');
-  const email   = (emailEl.value || '').trim();
-
-  // Mild email validation. Empty email is fine; we still capture anonymously.
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    msgEl.style.color = 'var(--red-600)';
-    msgEl.textContent = 'That email doesn\'t look right. Fix it or leave it blank.';
-    msgEl.style.display = 'block';
-    emailEl.focus();
-    return false; // block navigation
-  }
-
-  const payload = Object.assign({ form: 'roi', email, intent }, ROI_STATE);
-
-  // Fire-and-forget. cenarisForms.submit uses fetch under the hood; we don't
-  // await; navigation continues immediately and the request finishes in the
-  // background thanks to the browser's standard fetch lifetime.
-  if (window.cenarisForms && window.cenarisForms.submit) {
-    window.cenarisForms.submit('roi', payload).catch(() => {});
-  }
-
-  // Soft confirmation for same-tab navigation (waitlist).
-  if (email && !newTab) {
-    msgEl.style.color = 'var(--green-700)';
-    msgEl.textContent = '&#10003; Saved. We\'ll email you a copy.';
-    msgEl.style.display = 'block';
-  }
-
-  // Track ROI completion — intent only, no dollar amounts or personal data.
-  try { if (typeof window.trackROICalculatorComplete === 'function') window.trackROICalculatorComplete(intent); } catch(_) {}
-
-  return true;
-}
-
-document.getElementById('roi-send').addEventListener('click', function () {
-  const emailEl = document.getElementById('roi-email');
-  const msgEl   = document.getElementById('roi-cta-msg');
-  const email   = (emailEl.value || '').trim();
-
-  if (!email) {
-    msgEl.style.color = 'var(--red-600)';
-    msgEl.textContent = 'Please enter your email address.';
-    msgEl.style.display = 'block';
-    emailEl.focus();
-    return;
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    msgEl.style.color = 'var(--red-600)';
-    msgEl.textContent = 'That email doesn\'t look right. Please check it.';
-    msgEl.style.display = 'block';
-    emailEl.focus();
-    return;
-  }
-
-  const payload = Object.assign({ form: 'roi', email, intent: 'email_results' }, ROI_STATE);
-  if (window.cenarisForms && typeof window.cenarisForms.submit === 'function') {
-    window.cenarisForms.submit('roi', payload).catch(() => {});
-  }
-
-  this.disabled = true;
-  this.textContent = 'Sent &#10003;';
-  msgEl.style.color = 'var(--green-700)';
-  msgEl.textContent = '&#10003; On its way. Check your inbox shortly.';
-  msgEl.style.display = 'block';
-  try { if (typeof window.trackROICalculatorComplete === 'function') window.trackROICalculatorComplete('email_results'); } catch(_) {}
-});
-
-document.getElementById('roi-book').addEventListener('click', function (e) {
-  if (!captureRoiClick('book_call', this.href, true)) e.preventDefault();
-});
-document.getElementById('roi-waitlist').addEventListener('click', function (e) {
-  if (!captureRoiClick('join_waitlist', this.href, false)) e.preventDefault();
-});
-</script>
-
 <style>
 @media (max-width: 900px) {
   /* Output column: remove sticky so it flows below the inputs naturally */
   .rg-2 > div[style*="position:sticky"] { position: static !important; top: auto !important; }
 }
 </style>
-<script>window.CENARIS_PAGE = 'calc';</script>
 <script src="assets/analytics.js"></script>
 <script src="assets/chrome.js"></script>
 <script src="assets/forms.js"></script>
+<script src="assets/roi.js"></script>
 </body>
 </html>
