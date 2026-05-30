@@ -172,6 +172,6 @@ document.addEventListener('click', function(e) {
 });
 
 // Pricing page: fire a page-level event once on load.
-if (window.CENARIS_PAGE === 'pricing') {
+if (document.body.dataset.page === 'pricing') {
   trackEvent('pricing_page_view', { page_location: window.location.pathname });
 }

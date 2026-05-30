@@ -1,9 +1,9 @@
-// Cenaris site chrome &mdash; pre-launch bar, nav, footer, cookie banner, countdown.
-// Inserted via <script> on every page. Set window.CENARIS_PAGE = 'home' | 'about' | &hellip; before loading.
+// Cenaris site chrome — pre-launch bar, nav, footer, cookie banner, countdown.
+// Reads the active nav key from <body data-page="...">.
 (function () {
   const LAUNCH_ISO = '2026-07-01T00:00:00+10:00';
   const launchTime = new Date(LAUNCH_ISO).getTime();
-  const page = window.CENARIS_PAGE || '';
+  const page = document.body.dataset.page || '';
 
   const navLinks = [
     { href: '/',                  key: 'home',     label: 'Home' },

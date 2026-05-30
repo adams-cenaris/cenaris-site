@@ -69,6 +69,9 @@ module.exports = async function handler(req, res) {
   const supabase = getClient();
 
   if (req.method === 'GET') {
+    // 120 polls per IP per minute — 2× the 3-second widget cadence, room for multiple tabs
+    if (await checkRateLimit(req, res, 'chat:message:get', 120, 60)) return;
+
     const { conversationId, after } = req.query;
     const sessionId = req.headers['x-session-id'] || null;
     if (!conversationId) return res.status(400).json({ error: 'conversationId required' });

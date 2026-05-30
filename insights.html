@@ -9,7 +9,7 @@
 <link rel="icon" href="assets/favicon-icon.png" />
 <link rel="stylesheet" href="assets/site.css" />
 </head>
-<body>
+<body data-page="insights">
 <a class="skip-link" href="#main">Skip to content</a>
 <div id="prelaunch"></div>
 <div id="nav"></div>
@@ -224,38 +224,9 @@
 <div id="footer"></div>
 <div id="cookie"></div>
 
-<script>window.CENARIS_PAGE = 'insights';</script>
 <script src="assets/forms.js"></script>
 <script src="assets/analytics.js"></script>
 <script src="assets/chrome.js"></script>
-<script>
-  // Category filter + active-state for the Insights grid
-  (function () {
-    const filterBar = document.querySelector('.insights-filters');
-    if (!filterBar) return;
-    const cards = document.querySelectorAll('.insight-card');
-    const emptyMsg = document.querySelector('.insights-empty');
-    filterBar.addEventListener('click', function (e) {
-      const btn = e.target.closest('button[data-filter]');
-      if (!btn) return;
-      filterBar.querySelectorAll('button').forEach(function (b) {
-        b.classList.toggle('is-active', b === btn);
-        if (b === btn) { b.style.background = 'var(--gray-900)'; b.style.color = '#fff'; b.style.borderColor = 'var(--gray-900)'; }
-        else { b.style.background = ''; b.style.color = ''; b.style.borderColor = ''; }
-      });
-      const filter = btn.getAttribute('data-filter');
-      let shown = 0;
-      cards.forEach(function (c) {
-        const match = filter === 'all' || c.getAttribute('data-category') === filter;
-        c.style.display = match ? '' : 'none';
-        if (match) shown++;
-      });
-      if (emptyMsg) emptyMsg.style.display = shown === 0 ? 'block' : 'none';
-    });
-    // Seed initial active state
-    const init = filterBar.querySelector('button.is-active');
-    if (init) { init.style.background = 'var(--gray-900)'; init.style.color = '#fff'; init.style.borderColor = 'var(--gray-900)'; }
-  })();
-</script>
+<script src="assets/insights-filter.js"></script>
 </body>
 </html>
