@@ -16,7 +16,7 @@
         { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.clarity.ms; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.clarity.ms https://clarity.ms https://script.google.com; img-src 'self' data: https://www.google-analytics.com https://images.unsplash.com; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com;"
+          "value": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.clarity.ms; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.clarity.ms https://clarity.ms https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https://www.google-analytics.com https://images.unsplash.com; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com;"
         }
       ]
     },
